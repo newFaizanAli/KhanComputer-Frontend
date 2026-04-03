@@ -10,16 +10,19 @@ const DataTable = ({ columns, data, onEdit, onDelete, onView, rowKey = "id" }: {
     rowKey?: string
 }) => (
     <div className="overflow-x-auto">
-        <table className="w-full text-base">
+        <table className="w-full text-sm">
             <thead>
                 <tr className="border-b border-slate-700/50">
                     {columns?.map(col => (
-                        <th key={col.key} className="text-left px-5 py-4 text-slate-500 text-sm uppercase tracking-wider font-semibold whitespace-nowrap">
+                        <th
+                            key={col.key}
+                            className="text-left px-5 py-3 text-slate-500 text-xs uppercase tracking-wider font-semibold whitespace-nowrap"
+                        >
                             {col.label}
                         </th>
                     ))}
                     {(onEdit || onDelete || onView) && (
-                        <th className="px-5 py-4 text-slate-500 text-sm uppercase text-right font-semibold">
+                        <th className="px-5 py-3 text-slate-500 text-xs uppercase text-right font-semibold">
                             Actions
                         </th>
                     )}
@@ -27,39 +30,58 @@ const DataTable = ({ columns, data, onEdit, onDelete, onView, rowKey = "id" }: {
             </thead>
             <tbody>
                 {data?.map((row, i) => (
-                    <tr key={row[rowKey] ?? i} className="border-b border-slate-700/20 hover:bg-slate-800/40 transition-colors">
+                    <tr
+                        key={row[rowKey] ?? i}
+                        className="border-b border-slate-700/20 hover:bg-slate-800/40 transition-colors"
+                    >
                         {columns?.map(col => (
-                            <td key={col.key} className="px-5 py-4 text-slate-200 font-medium whitespace-nowrap">
+                            <td
+                                key={col.key}
+                                className="px-5 py-3 text-slate-200 font-medium whitespace-nowrap"
+                            >
                                 {col.render ? col.render(row[col.key], row) : row[col.key]}
                             </td>
                         ))}
+
                         {(onEdit || onDelete || onView) && (
-                            <td className="px-5 py-4 text-right">
+                            <td className="px-5 py-3 text-right">
                                 <div className="flex items-center justify-end gap-2">
                                     {onView && (
-                                        <button onClick={() => onView(row)} className="w-9 h-9 flex items-center justify-center rounded-lg text-slate-500 hover:text-indigo-400 hover:bg-indigo-500/10 transition-colors">
-                                            <EyeIcon size={18} />
+                                        <button
+                                            onClick={() => onView(row)}
+                                            className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-indigo-400 hover:bg-indigo-500/10 transition-colors"
+                                        >
+                                            <EyeIcon size={16} />
                                         </button>
                                     )}
                                     {onEdit && (
-                                        <button onClick={() => onEdit(row)} className="w-9 h-9 flex items-center justify-center rounded-lg text-slate-500 hover:text-cyan-400 hover:bg-cyan-500/10 transition-colors">
-                                            <Pencil size={18} /> {/* Increased icon size */}
+                                        <button
+                                            onClick={() => onEdit(row)}
+                                            className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-cyan-400 hover:bg-cyan-500/10 transition-colors"
+                                        >
+                                            <Pencil size={16} />
                                         </button>
                                     )}
                                     {onDelete && (
-                                        <button onClick={() => onDelete(row)} className="w-9 h-9 flex items-center justify-center rounded-lg text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-colors">
-                                            <Trash2 size={18} />
+                                        <button
+                                            onClick={() => onDelete(row)}
+                                            className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                                        >
+                                            <Trash2 size={16} />
                                         </button>
                                     )}
-
                                 </div>
                             </td>
                         )}
                     </tr>
                 ))}
+
                 {data?.length === 0 && (
                     <tr>
-                        <td colSpan={99} className="py-12 text-center text-slate-400 text-base font-medium">
+                        <td
+                            colSpan={99}
+                            className="py-10 text-center text-slate-400 text-sm font-medium"
+                        >
                             No records found
                         </td>
                     </tr>
