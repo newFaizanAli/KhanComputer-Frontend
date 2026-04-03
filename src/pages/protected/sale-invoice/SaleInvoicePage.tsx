@@ -86,7 +86,6 @@ const SaleInvoicePage = () => {
             <Card>
                 <DataTable
                     columns={[
-                        { key: "id", label: "ID", render: (v: string) => <span className="text-slate-400">{v}</span> },
                         { key: "code", label: "Code", render: (v: string) => <span className="text-slate-400">{v}</span> },
                         { key: "quotationCode", label: "Quotation Code", render: (v: string) => <span className="text-slate-400">{v || "-"}</span> },
                         { key: 'customerName', label: 'Customer Name', render: (s: string) => <span className="text-slate-400">{s}</span> },
@@ -123,6 +122,7 @@ const SaleInvoicePage = () => {
                     onEdit={(r: SaleInvoice) => handleEdit(r)}
                     onDelete={(r: SaleInvoice) => handleDelete(r?.id as string)}
                     onView={(r: SaleInvoice) => handleViewInvoice(r?.id as string)}
+                    searchKeys={["code"]}
                 />
             </Card>
 

@@ -68,6 +68,7 @@ const CustomerPage = () => {
                     data={customers}
                     onEdit={(r: Customer) => handleEdit(r)}
                     onDelete={(r: Customer) => handleDelete(r.id || '')}
+                    searchKeys={["name", "email"]}
                 />
             </Card>
             <Modal open={modal} onClose={() => handleClose()} title={isEdit ? "Edit Customer" : "Add Customer"}>

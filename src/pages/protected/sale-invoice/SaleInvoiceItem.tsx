@@ -83,7 +83,6 @@ const SaleInvoiceItemPage = () => {
             <Card>
                 <DataTable
                     columns={[
-                        { key: "id", label: "ID", render: (v: string) => <span className="text-slate-400">{v}</span> },
                         { key: 'description', label: 'Item', render: (p: string) => <span className="text-slate-400">{p}</span> },
                         { key: 'quantity', label: 'Quantity', render: (q: number) => <span className="text-slate-400">{q}</span> },
                         { key: 'uom', label: 'UOM', render: (u: string) => <span className="text-slate-400">{u}</span> },
@@ -104,7 +103,7 @@ const SaleInvoiceItemPage = () => {
                     data={itemsData}
                     onEdit={(r: SaleInvoiceItem) => handleEdit(r)}
                     onDelete={(r: SaleInvoiceItem) => handleDelete(r?.id as string)}
-
+                    searchKeys={["description"]}
                 />
             </Card>
             <Modal open={modal} onClose={() => handleClose()} title={isEdit ? "Edit Sale Item" : "Add Sale Item"}>

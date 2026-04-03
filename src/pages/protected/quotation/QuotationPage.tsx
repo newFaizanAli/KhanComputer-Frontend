@@ -87,7 +87,6 @@ const QuotationPage = () => {
             <Card>
                 <DataTable
                     columns={[
-                        { key: "id", label: "ID", render: (v: string) => <span className="text-slate-400">{v}</span> },
                         { key: "code", label: "Code", render: (v: string) => <span className="text-slate-400">{v}</span> },
                         { key: 'customerName', label: 'Customer Name', render: (s: string) => <span className="text-slate-400">{s}</span> },
                         { key: 'date', label: 'Date', render: (v: Date) => <span className="text-slate-400">{new Date(v).toDateString()}</span> },
@@ -123,6 +122,7 @@ const QuotationPage = () => {
                     onEdit={(r: Quotation) => handleEdit(r)}
                     onDelete={(r: Quotation) => handleDelete(r?.id as string)}
                     onView={(r: Quotation) => handleViewQuotatation(r?.id as string)}
+                    searchKeys={["code"]}
                 />
             </Card>
 

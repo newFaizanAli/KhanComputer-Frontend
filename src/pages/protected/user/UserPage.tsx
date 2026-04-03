@@ -61,12 +61,11 @@ const UserPage = () => {
                             )
                         },
                         { key: "email", label: "Email", render: (v: string) => <span className="text-slate-400">{v}</span> },
-
-
                     ]}
                     data={users}
                     onEdit={(r: User) => handleEdit(r)}
                     onDelete={(r: User) => alert("Delete: " + r.name)}
+                    searchKeys={["name", "email"]}
                 />
             </Card>
 
