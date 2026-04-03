@@ -27,9 +27,9 @@ const CombinedSaleInvoiceForm = () => {
                     date: data.date,
                     order_reference_no: data.order_reference_no || '',
                     discount: Number(data.discount),
-                    tax: Number(data.tax),
+                    gst: Number(data.gst),
                     notes: data.notes,
-                    items: data.items.map(i => ({ ...i, description: i.description || null })),
+                    items: data.items.map(i => ({ ...i, description: i.description || "" })),
                 })
             }}
         />

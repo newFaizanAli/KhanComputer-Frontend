@@ -20,9 +20,9 @@ const CombinedQuotationForm = () => {
                     date: data.date,
                     valid_until: data.valid_until as string,
                     discount: Number(data.discount),
-                    tax: Number(data.tax),
+                    gst: Number(data.gst),
                     notes: data.notes,
-                    items: data.items.map(i => ({ ...i, description: i.description || null })),
+                    items: data.items.map(i => ({ ...i, description: i.description || "" })),
                 })
             }}
         />
