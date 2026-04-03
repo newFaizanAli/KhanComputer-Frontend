@@ -7,12 +7,21 @@ type PageHeaderProps = {
 
 
 const PageHeader = ({ title, subtitle, actions }: PageHeaderProps) => (
-    <div className="flex items-start justify-between mb-6">
-        <div>
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
+        {/* Title & Subtitle */}
+        <div className="flex flex-col">
             <h1 className="text-xl font-bold text-white mono">{title}</h1>
-            {subtitle && <p className="text-slate-500 text-sm mt-0.5">{subtitle}</p>}
+            {subtitle && (
+                <p className="text-slate-500 text-sm mt-1 sm:mt-0.5">{subtitle}</p>
+            )}
         </div>
-        {actions && <div className="flex items-center gap-2 flex-wrap">{actions}</div>}
+
+        {/* Actions */}
+        {actions && (
+            <div className="flex flex-wrap items-center gap-2 justify-start sm:justify-end">
+                {actions}
+            </div>
+        )}
     </div>
 );
 
