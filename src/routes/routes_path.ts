@@ -3,6 +3,7 @@ export interface RoutesPathProps {
   AUTH: {
     SIGNIN: string;
     SIGNUP: string;
+    PROFILE: string;
   };
   ANALYTICS: { ROOT: string };
   DASHBOARD: {
@@ -34,6 +35,7 @@ export const ROUTES_PATHS: RoutesPathProps = {
   AUTH: {
     SIGNIN: "/",
     SIGNUP: "/auth/signup",
+    PROFILE: "/auth/profile",
   },
   ANALYTICS: {
     ROOT: "/analytics",

@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import { useAuthStore } from "../../../store";
 import { ChevronDown, ChevronLeft, ChevronRight, Globe } from "lucide-react";
 import NAV_TREE from "../nav_tree";
+import { ROUTES_PATHS } from "../../../routes/routes_path";
 
 interface SidebarProps {
   collapsed: boolean;
@@ -37,13 +38,15 @@ function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
 
   const toggle = (id: string) => setOpen((p) => ({ ...p, [id]: !p[id] }));
 
+
+
   return (
     <aside
       className={`h-screen bg-slate-950 border-r border-slate-800/70 flex flex-col transition-all duration-300 shrink-0 ${collapsed ? "w-14" : "w-56"
         }`}
     >
       {/* Logo */}
-      <div
+      <Link to={ROUTES_PATHS.DASHBOARD.ROOT}
         className={`flex items-center ${collapsed ? "justify-center" : "px-4 gap-2.5"
           } h-14 border-b border-slate-800/70 shrink-0`}
       >
@@ -55,7 +58,7 @@ function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
             KCN<span className="text-cyan-400">NETWORK</span>
           </span>
         )}
-      </div>
+      </Link>
 
       {/* Nav */}
       <nav className="flex-1 py-2 overflow-y-auto">

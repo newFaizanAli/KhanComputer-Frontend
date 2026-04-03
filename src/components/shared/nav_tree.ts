@@ -1,14 +1,14 @@
 import {
   Home,
   LayoutDashboard,
-  BarChart3,
   Store,
   Users,
   User,
   FileText,
   FileCheck,
   Receipt,
-  Files, // ✅ added
+  Files,
+  User2, // ✅ added
 } from "lucide-react";
 
 import { ROUTES_PATHS } from "../../routes/routes_path";
@@ -25,11 +25,18 @@ const NAV_TREE = [
         icon: LayoutDashboard,
         route: ROUTES_PATHS.DASHBOARD.ROOT,
       },
+    ],
+  },
+  {
+    id: "user_module",
+    label: "User",
+    icon: Users,
+    children: [
       {
-        id: "analytics_overview",
-        label: "Analytics",
-        icon: BarChart3,
-        route: ROUTES_PATHS.ANALYTICS.ROOT,
+        id: "user_management",
+        label: "User Management",
+        icon: User2,
+        route: ROUTES_PATHS.DASHBOARD.USER.ROOT,
       },
     ],
   },

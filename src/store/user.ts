@@ -43,7 +43,7 @@ const useUserStore = create<UserStore>((set) => ({
       }>(`${URL}/${id}`);
 
       if (resp.data.success) {
-        return resp.data.data;
+        return resp.data.data as User;
       } else {
         toastError(resp.data.message);
       }

@@ -6,6 +6,7 @@ import useQuotationStore from "./quotation";
 import useQuotationItemStore from "./quotation/item";
 import useSaleInvoiceStore from "./sale-invoice";
 import useSaleInvoiceItemStore from "./sale-invoice/item";
+import useProfileStore from "./profile";
 
 export {
   useAuthStore,
@@ -16,4 +17,5 @@ export {
   useQuotationItemStore,
   useSaleInvoiceStore,
   useSaleInvoiceItemStore,
+  useProfileStore
 };

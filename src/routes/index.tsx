@@ -5,7 +5,8 @@ import {
     SignInPage, DashboardPage, AnalyticsPage, UserPage, NotFound, CustomerPage, StorePage,
     QuotationPage, QuotationItemPage, CombinedQuotationPage,
     SaleInvoicePage, SaleInvoiceItemPage,
-    CombinedSaleInvoicePage
+    CombinedSaleInvoicePage,
+    ProfilePage
 } from "../pages";
 
 
@@ -32,6 +33,7 @@ const appRoutes: {
                 { path: ROUTES_PATHS.DASHBOARD.USER.ROOT, element: <UserPage /> },
                 { path: ROUTES_PATHS.ANALYTICS.ROOT, element: <AnalyticsPage /> },
                 { path: ROUTES_PATHS.DASHBOARD.STORE.ROOT, element: <StorePage /> },
+                { path: ROUTES_PATHS.AUTH.PROFILE, element: <ProfilePage /> },
                 { path: ROUTES_PATHS.DASHBOARD.CUSTOMER.ROOT, element: <CustomerPage /> },
                 { path: ROUTES_PATHS.DASHBOARD.QUOTATION.ROOT, element: <QuotationPage /> },
                 { path: ROUTES_PATHS.DASHBOARD.QUOTATION.ITEM, element: <QuotationItemPage /> },

@@ -4,7 +4,7 @@ import type { User } from "../../../types";
 import { useUserStore } from "../../../store";
 import UserForm from "../../../form/UserForm";
 import { Modal, SuspenseWrap, DataTable } from "../../../components/page";
-import { Button, Alert, Card } from "../../../components/ui";
+import { Button, Card } from "../../../components/ui";
 import { PageHeader } from "../../../components/page";
 
 
@@ -44,12 +44,11 @@ const UserPage = () => {
 
     return (
         <SuspenseWrap>
-            <PageHeader title="User Management" subtitle="Admin & sub-admin accounts"
+            <PageHeader title="User Management" subtitle="Manage your admin users here"
                 actions={
                     <Button icon={Plus} onClick={() => setModal(true)}>Add User</Button>
                 }
             />
-            <Alert variant="info" className="mb-5">Only <strong>admins</strong> can access this users page.</Alert>
             <Card>
                 <DataTable
                     columns={[
