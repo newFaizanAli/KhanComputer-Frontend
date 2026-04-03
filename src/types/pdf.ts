@@ -4,7 +4,7 @@ import type {
   Customer,
   QuotationItem,
   StoreInfo,
-  PurchaseInvoiceItem,
+  SaleInvoiceItem,
 } from "./index";
 
 export interface DocumentMeta {
@@ -19,7 +19,7 @@ export interface NormalizedDocumentData {
   meta: DocumentMeta;
   customer: Customer | null;
   store: StoreInfo | null;
-  items: QuotationItem[] | PurchaseInvoiceItem[];
+  items: QuotationItem[] | SaleInvoiceItem[];
   discount: number;
   gst: number;
   notes?: string;
