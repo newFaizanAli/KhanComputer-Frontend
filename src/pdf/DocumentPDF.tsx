@@ -56,10 +56,45 @@ const DocumentPDF: React.FC<{ data: NormalizedDocumentData }> = ({ data }) => {
     const isInvoice = docType === "INVOICE";
 
     // ── Totals (all guarded by fmt which defaults to 0) ──────────────────────
-    const subtotal = items.reduce((s, i) => s + Number(i?.price || 0) * Number(i?.quantity || 0), 0);
-    const itemDisc = items.reduce((s, i) => s + Number(i?.discount || 0), 0);
-    const itemGst = items.reduce((s, i) => s + Number(i?.gst || 0), 0);
-    const grandTotal = subtotal - itemDisc + itemGst - Number(discount) + Number(gst);
+    // ── Totals (CORRECT CALCULATION) ──────────────────────
+    const totals = items.reduce((acc, item) => {
+        const qty = Number(item?.quantity || 0);
+        const price = Number(item?.price || 0);
+
+        const base = qty * price;
+
+        const discPercent = Number(item?.discount || 0);
+        const gstPercent = Number(item?.gst || 0);
+
+        const discAmount = (base * discPercent) / 100;
+        const afterDisc = base - discAmount;
+
+        const gstAmount = (afterDisc * gstPercent) / 100;
+
+        acc.subtotal += base;
+        acc.itemDiscount += discAmount;
+        acc.itemGST += gstAmount;
+
+        return acc;
+    }, {
+        subtotal: 0,
+        itemDiscount: 0,
+        itemGST: 0,
+    });
+
+    // Header level
+    const headerDiscount = Number(discount || 0);
+    const headerGST = Number(gst || 0);
+
+    // Apply header discount FIRST, then GST
+    const afterHeaderDiscount = totals.subtotal - totals.itemDiscount - headerDiscount;
+    const headerGSTAmount = (afterHeaderDiscount * headerGST) / 100;
+
+    // Final Grand Total
+    const grandTotal =
+        afterHeaderDiscount +
+        totals.itemGST +
+        headerGSTAmount;
 
     const storeNotes = isInvoice ? store?.sale_invoice_notes : store?.quotation_notes;
     const allNotes = [notes, store?.notes].filter(Boolean).join("\n\n");
@@ -204,11 +239,27 @@ const DocumentPDF: React.FC<{ data: NormalizedDocumentData }> = ({ data }) => {
                 <View style={pdf_style.totalsWrap}>
                     <View style={pdf_style.totalsInner}>
                         {[
-                            { label: "Subtotal", val: `PKR ${fmt(subtotal)}` },
-                            { label: "Item Discounts", val: `- ${fmt(itemDisc)}%` },
-                            { label: "Item GST", val: `+ ${fmt(itemGst)}%` },
-                            { label: "Header Discount", val: `- PKR ${fmt(discount)}` },
-                            { label: "Header GST", val: `+ PKR ${fmt(gst)}` },
+                            { label: "Subtotal", val: `PKR ${fmt(totals.subtotal)}` },
+
+                            {
+                                label: "Item Discount",
+                                val: `- PKR ${fmt(totals.itemDiscount)} (${items.length ? 'varies per item' : '0%'})`
+                            },
+
+                            {
+                                label: "Item GST",
+                                val: `+ PKR ${fmt(totals.itemGST)} (${items.length ? 'varies per item' : '0%'})`
+                            },
+
+                            {
+                                label: "Header Discount",
+                                val: `- PKR ${fmt(headerDiscount)} (${fmt(discount)}%)`
+                            },
+
+                            {
+                                label: "Header GST",
+                                val: `+ PKR ${fmt(headerGSTAmount)} (${fmt(gst)}%)`
+                            },
                         ].map((row) => (
                             <View key={row.label} style={pdf_style.totalRow}>
                                 <Text style={pdf_style.totalLabel}>{row.label}</Text>
