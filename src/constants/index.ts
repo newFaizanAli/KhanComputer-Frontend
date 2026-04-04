@@ -59,3 +59,32 @@ export const ITEMUOM: {
   { value: "ROLL", label: "Roll" }, // cable rolls
   { value: "PIECE_SET", label: "Piece Set" },
 ];
+
+export const PAYMENT_METHODS: {
+  value: string;
+  label: string;
+}[] = [
+  // 🔹 Basic Units (MOST USED)
+  { value: "CASH", label: "Cash" },
+  { value: "CARD", label: "Credit/Debit Card" },
+  { value: "BANK_TRANSFER", label: "Bank Transfer" },
+  { value: "ONLINE_PAYMENT", label: "Online Payment" },
+  { value: "MOBILE_PAYMENT", label: "Mobile Payment" },
+  { value: "CHEQUE", label: "Cheque" },
+  { value: "CREDIT", label: "Credit" },
+  { value: "JAZZCASH", label: "JazzCash" },
+  { value: "EASYPAISA", label: "EasyPaisa" },
+  { value: "OTHER", label: "Other" },
+];
+
+export const PAYMENT_STATUS: {
+  value: string;
+  label: string;
+}[] = [
+  // 🔹 Basic Units (MOST USED)
+  { value: "PAID", label: "Paid" },
+  { value: "UNPAID", label: "Unpaid" },
+  { value: "PENDING", label: "Pending" },
+  { value: "OVERDUE", label: "Overdue" },
+  { value: "PARTIAL", label: "Partial Payment" },
+];

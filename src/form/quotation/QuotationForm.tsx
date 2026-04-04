@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import type { Quotation } from "../../types";
 import { useQuotationStore, useCustomerStore } from '../../store';
-import { FormInput, FormSearchSelect, FormTextarea } from '../../components/form';
+import { FormCheckbox, FormInput, FormSearchSelect, FormTextarea } from '../../components/form';
 import { Button } from '../../components/ui';
 
 
@@ -136,6 +136,12 @@ const QuotationForm = ({ setModal, isEdit, defaultValues, handleClose }: Quotati
                 />
 
             </div>
+
+            <FormCheckbox
+                label="Prices Inclusive of GST"
+                name="is_tax_inclusive"
+                register={register}
+            />
 
 
             <FormTextarea

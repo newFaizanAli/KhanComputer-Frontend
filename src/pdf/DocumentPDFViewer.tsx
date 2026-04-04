@@ -34,7 +34,7 @@ const fromQuotation = (
     discount: Number(quotation?.discount ?? 0),
     gst: Number(quotation?.gst ?? 0),
     notes: quotation?.notes ?? "",
-
+    is_tax_inclusive: false,
 });
 
 const fromInvoice = (
@@ -58,7 +58,12 @@ const fromInvoice = (
     discount: Number(invoice?.discount ?? 0),
     gst: Number(invoice?.gst ?? 0),
     notes: invoice?.notes ?? "",
-
+    is_tax_inclusive: invoice?.is_tax_inclusive ?? false,
+    // Extra invoice-only fields
+    payment_method: invoice?.payment_method ?? null,
+    payment_reference: invoice?.payment_reference ?? null,
+    payment_status: invoice?.payment_status ?? null,
+    quotation_code: invoice?.quotationCode ?? null,
 });
 
 // ── Types ────────────────────────────────────────────────────────────────────

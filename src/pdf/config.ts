@@ -45,6 +45,7 @@ export const fmt = (v: number | string | null | undefined): string =>
     maximumFractionDigits: 2,
   });
 
+// ── Full columns (with GST) — used when is_tax_inclusive = false ─────────────
 export const ITEM_COLS = [
   { label: "#", flex: 0.4, align: "center" as const },
   { label: "Description", flex: 3.2, align: "left" as const },
@@ -53,6 +54,18 @@ export const ITEM_COLS = [
   { label: "Unit Price", flex: 1.2, align: "right" as const },
   { label: "Disc %", flex: 0.7, align: "right" as const },
   { label: "GST %", flex: 0.7, align: "right" as const },
+  { label: "Total", flex: 1.2, align: "right" as const },
+];
+
+// ── No-tax columns — used when is_tax_inclusive = true ───────────────────────
+// GST % column is intentionally removed; description gets the freed flex back
+export const ITEM_COLS_NO_TAX = [
+  { label: "#", flex: 0.4, align: "center" as const },
+  { label: "Description", flex: 3.9, align: "left" as const },
+  { label: "UOM", flex: 0.7, align: "center" as const },
+  { label: "Qty", flex: 0.6, align: "center" as const },
+  { label: "Unit Price", flex: 1.2, align: "right" as const },
+  { label: "Disc %", flex: 0.7, align: "right" as const },
   { label: "Total", flex: 1.2, align: "right" as const },
 ];
 
@@ -76,7 +89,7 @@ export const pdf_style = StyleSheet.create({
     marginBottom: 6,
     paddingBottom: 12,
     borderBottomWidth: 2,
-    borderBottomColor: C.brand, // solid navy underline — formal & clean
+    borderBottomColor: C.brand,
   },
   headerLeft: {
     flexDirection: "column",
@@ -90,7 +103,7 @@ export const pdf_style = StyleSheet.create({
   },
   tagline: {
     fontSize: 7.5,
-    color: C.muted, // grey tagline — understated
+    color: C.muted,
     letterSpacing: 1.5,
     marginTop: 1,
   },
@@ -117,7 +130,7 @@ export const pdf_style = StyleSheet.create({
   },
   badgeSubText: {
     fontSize: 6.5,
-    color: "#c8d4e3", // pale navy-white
+    color: "#c8d4e3",
     letterSpacing: 1.2,
     marginTop: 3,
   },
@@ -138,7 +151,7 @@ export const pdf_style = StyleSheet.create({
   },
   metaLabel: {
     fontSize: 6.5,
-    color: C.accent, // silver-blue labels inside navy strip
+    color: C.accent,
     letterSpacing: 0.8,
     marginBottom: 2,
   },
@@ -149,7 +162,7 @@ export const pdf_style = StyleSheet.create({
   },
   metaDivider: {
     width: 1,
-    backgroundColor: "#2e4060", // slightly lighter than brand
+    backgroundColor: "#2e4060",
     marginHorizontal: 4,
   },
 
@@ -170,7 +183,7 @@ export const pdf_style = StyleSheet.create({
     fontSize: 7,
     fontFamily: "Helvetica-Bold",
     color: C.white,
-    backgroundColor: C.brand, // navy title bar — no cyan, classic look
+    backgroundColor: C.brand,
     paddingVertical: 4,
     paddingHorizontal: 8,
     letterSpacing: 1.2,
@@ -189,6 +202,51 @@ export const pdf_style = StyleSheet.create({
     fontSize: 7.5,
     color: C.muted,
     marginBottom: 1.5,
+  },
+
+  // ── Payment details strip (invoice only) ────────────────────
+  paymentRow: {
+    flexDirection: "row",
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: C.border,
+    borderRadius: 3,
+    overflow: "hidden",
+  },
+  paymentItem: {
+    flex: 1,
+    flexDirection: "column",
+    paddingVertical: 7,
+    paddingHorizontal: 12,
+    backgroundColor: C.lightBg,
+    gap: 3,
+  },
+  paymentItemBordered: {
+    borderLeftWidth: 1,
+    borderLeftColor: C.border,
+  },
+  paymentLabel: {
+    fontSize: 6.5,
+    color: C.muted,
+    letterSpacing: 0.8,
+  },
+  paymentValue: {
+    fontSize: 8.5,
+    fontFamily: "Helvetica-Bold",
+    color: C.text,
+  },
+  statusBadge: {
+    borderRadius: 3,
+    paddingVertical: 2,
+    paddingHorizontal: 7,
+    alignSelf: "flex-start",
+    marginTop: 1,
+  },
+  statusBadgeText: {
+    fontSize: 7,
+    fontFamily: "Helvetica-Bold",
+    color: C.white,
+    letterSpacing: 0.6,
   },
 
   // ── Table ───────────────────────────────────────────────────
@@ -217,7 +275,7 @@ export const pdf_style = StyleSheet.create({
     paddingVertical: 5,
     paddingHorizontal: 6,
     borderBottomWidth: 1,
-    borderBottomColor: C.border, // thin silver separator between rows
+    borderBottomColor: C.border,
   },
   tableCell: {
     fontSize: 7.5,
@@ -266,7 +324,7 @@ export const pdf_style = StyleSheet.create({
   grandLabel: {
     fontSize: 8.5,
     fontFamily: "Helvetica-Bold",
-    color: C.gold, // muted gold label inside navy — classic look
+    color: C.gold,
     letterSpacing: 1,
   },
   grandVal: {
@@ -287,7 +345,7 @@ export const pdf_style = StyleSheet.create({
     fontSize: 7,
     fontFamily: "Helvetica-Bold",
     color: C.white,
-    backgroundColor: C.brandLight, // slightly lighter navy than header
+    backgroundColor: C.brandLight,
     paddingVertical: 4,
     paddingHorizontal: 8,
     letterSpacing: 1,
@@ -317,7 +375,7 @@ export const pdf_style = StyleSheet.create({
   termTitle: {
     fontSize: 6.5,
     fontFamily: "Helvetica-Bold",
-    color: C.brand, // navy term titles — no cyan
+    color: C.brand,
     letterSpacing: 0.8,
     marginBottom: 3,
   },
@@ -353,7 +411,7 @@ export const pdf_style = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     borderTopWidth: 1,
-    borderTopColor: C.border, // silver border — subtle, not cyan
+    borderTopColor: C.border,
     paddingTop: 6,
   },
   footerLeft: {

@@ -28,4 +28,8 @@ export interface CombinedDocumentFormValues {
   quotationId?: string | null;
   quotationCode?: string | null;
   order_reference_no?: string;
+  payment_method?: string;
+  payment_reference?: string;
+  payment_status?: string;
+  is_tax_inclusive?: boolean;
 }

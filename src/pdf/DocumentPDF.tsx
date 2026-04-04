@@ -2,12 +2,10 @@
 
 import React from "react";
 import { Document, Page, Text, View } from "@react-pdf/renderer";
-import { C, ITEM_COLS, fmt, fmtDate, safe, pdf_style } from "./config";
+import { C, ITEM_COLS, ITEM_COLS_NO_TAX, fmt, fmtDate, safe, pdf_style } from "./config";
 import type { NormalizedDocumentData } from "../types";
 
-
 // ── Safe info-box line builder ───────────────────────────────────────────────
-// Returns nothing if value is empty — so the line is completely omitted
 const line = (label: string, value: unknown) =>
     value ? { text: `${label}${String(value)}` } : null;
 
@@ -38,79 +36,82 @@ const InfoBox: React.FC<{
     );
 };
 
+// ── Payment status badge colour ───────────────────────────────────────────────
+const paymentStatusColor = (status: string | null | undefined): string => {
+    switch ((status ?? "").toLowerCase()) {
+        case "paid": return "#16a34a";
+        case "partial": return "#d97706";
+        case "unpaid":
+        default: return "#dc2626";
+    }
+};
+
 // ── Main component ───────────────────────────────────────────────────────────
 const DocumentPDF: React.FC<{ data: NormalizedDocumentData }> = ({ data }) => {
 
-    // Guard the entire data object — never trust what comes from the API
-    const {
-        docType = "QUOTATION",
-        meta = { code: "—", date: "", thirdField: { label: "—", value: "—" } },
-        customer = null,
-        store = null,
-        items = [],
-        discount = 0,
-        gst = 0,
-        notes = "",
-    } = data ?? {};
+    // ── Pull every field individually — no spread/cast, fully typed ───────────
+    const docType = data.docType ?? "QUOTATION";
+    const meta = data.meta ?? { code: "—", date: "", thirdField: { label: "—", value: "—" } };
+    const customer = data.customer ?? null;
+    const store = data.store ?? null;
+    const items = data.items ?? [];
+    const discount = Number(data.discount ?? 0);
+    const gst = Number(data.gst ?? 0);
+    const notes = data.notes ?? "";
+    // Explicit boolean: only `true` counts as tax-inclusive
+    const isTaxInclusive = data.is_tax_inclusive === true;
+    // Invoice-only fields — all declared in NormalizedDocumentData
+    const payment_method = data.payment_method ?? null;
+    const payment_reference = data.payment_reference ?? null;
+    const payment_status = data.payment_status ?? null;
+    const quotation_code = data.quotation_code ?? null;
 
     const isInvoice = docType === "INVOICE";
+    // showTax drives ALL conditional rendering: columns, totals rows, info lines
+    const showTax = !isTaxInclusive;
 
-    // ── Totals (all guarded by fmt which defaults to 0) ──────────────────────
-    // ── Totals (CORRECT CALCULATION) ──────────────────────
+    // ── Totals ────────────────────────────────────────────────────────────────
     const totals = items.reduce((acc, item) => {
         const qty = Number(item?.quantity || 0);
         const price = Number(item?.price || 0);
-
         const base = qty * price;
-
         const discPercent = Number(item?.discount || 0);
         const gstPercent = Number(item?.gst || 0);
-
         const discAmount = (base * discPercent) / 100;
         const afterDisc = base - discAmount;
-
         const gstAmount = (afterDisc * gstPercent) / 100;
-
         acc.subtotal += base;
         acc.itemDiscount += discAmount;
         acc.itemGST += gstAmount;
-
         return acc;
-    }, {
-        subtotal: 0,
-        itemDiscount: 0,
-        itemGST: 0,
-    });
+    }, { subtotal: 0, itemDiscount: 0, itemGST: 0 });
 
-    // Header level
     const headerDiscount = Number(discount || 0);
     const headerGST = Number(gst || 0);
-
-    // Apply header discount FIRST, then GST
     const afterHeaderDiscount = totals.subtotal - totals.itemDiscount - headerDiscount;
     const headerGSTAmount = (afterHeaderDiscount * headerGST) / 100;
 
-    // Final Grand Total
-    const grandTotal =
-        afterHeaderDiscount +
-        totals.itemGST +
-        headerGSTAmount;
+    // When tax-inclusive: discounts apply but NO gst is added
+    const grandTotal = showTax
+        ? afterHeaderDiscount + totals.itemGST + headerGSTAmount
+        : afterHeaderDiscount;
 
     const storeNotes = isInvoice ? store?.sale_invoice_notes : store?.quotation_notes;
     const allNotes = [notes, store?.notes].filter(Boolean).join("\n\n");
-
     const contactLine = [store?.address, store?.phone, store?.email]
-        .filter(Boolean)
-        .join("   |   ") || "—";
+        .filter(Boolean).join("   |   ") || "—";
 
-    // ── Info lines — null entries are filtered out in <InfoBox> ─────────────
+    // ── Info lines — spread syntax so no conditional null in the middle ────────
     const billLines = [
         bold(customer?.name),
         line("", customer?.address),
         line("Phone: ", customer?.phone),
         line("Email: ", customer?.email),
-        line("GST No: ", customer?.gst),
-        line("NTN: ", customer?.ntn),
+        // Tax fields: only pushed when showTax is true
+        ...(showTax ? [
+            line("GST No: ", customer?.gst),
+            line("NTN: ", customer?.ntn),
+        ] : []),
     ];
 
     const fromLines = [
@@ -118,17 +119,62 @@ const DocumentPDF: React.FC<{ data: NormalizedDocumentData }> = ({ data }) => {
         line("", store?.address),
         line("Phone: ", store?.phone),
         line("Email: ", store?.email),
-        line("GST No: ", store?.gst_no),
-        line("NTN: ", store?.ntn),
+        ...(showTax ? [
+            line("GST No: ", store?.gst_no),
+            line("NTN: ", store?.ntn),
+        ] : []),
     ];
 
-    // ── Meta strip items ─────────────────────────────────────────────────────
+    // ── Meta strip ────────────────────────────────────────────────────────────
     const metaItems = [
         { label: isInvoice ? "INVOICE NO." : "QUOTATION NO.", value: safe(meta?.code) },
         { label: "ISSUE DATE", value: fmtDate(meta?.date) },
         { label: safe(meta?.thirdField?.label), value: safe(meta?.thirdField?.value) },
-
+        ...(isInvoice && quotation_code
+            ? [{ label: "QUOTATION REF.", value: safe(quotation_code) }]
+            : []),
     ];
+
+    // ── Table columns ─────────────────────────────────────────────────────────
+    const columns = showTax ? ITEM_COLS : ITEM_COLS_NO_TAX;
+
+    const itemCellValues = (item: typeof items[number], idx: number): string[] => {
+        const desc = safe(item?.description);
+        const note = item?.notes ? ` — ${safe(item.notes)}` : "";
+        if (showTax) {
+            return [
+                String(idx + 1),
+                desc + note,
+                safe(item?.uom) === "—" ? "—" : safe(item?.uom),
+                fmt(item?.quantity),
+                `PKR ${fmt(item?.price)}`,
+                `${fmt(item?.discount)}%`,
+                `${fmt(item?.gst)}%`,
+                `PKR ${fmt(item?.total)}`,
+            ];
+        }
+        return [
+            String(idx + 1),
+            desc + note,
+            safe(item?.uom) === "—" ? "—" : safe(item?.uom),
+            fmt(item?.quantity),
+            `PKR ${fmt(item?.price)}`,
+            `${fmt(item?.discount)}%`,
+            `PKR ${fmt(item?.total)}`,
+        ];
+    };
+
+    // ── Totals rows ───────────────────────────────────────────────────────────
+    const totalRows = [
+        { label: "Subtotal", val: `PKR ${fmt(totals.subtotal)}` },
+        { label: "Item Discount", val: `- PKR ${fmt(totals.itemDiscount)} (${items.length ? "varies per item" : "0%"})` },
+        ...(showTax ? [{ label: "Item GST", val: `+ PKR ${fmt(totals.itemGST)} (${items.length ? "varies per item" : "0%"})` }] : []),
+        { label: "Header Discount", val: `- PKR ${fmt(headerDiscount)} (${fmt(discount)}%)` },
+        ...(showTax ? [{ label: "Header GST", val: `+ PKR ${fmt(headerGSTAmount)} (${fmt(gst)}%)` }] : []),
+    ];
+
+    // ── Payment block: only shown for invoices that have at least one field ───
+    const hasPaymentInfo = isInvoice && (!!payment_method || !!payment_reference || !!payment_status);
 
     return (
         <Document>
@@ -151,6 +197,17 @@ const DocumentPDF: React.FC<{ data: NormalizedDocumentData }> = ({ data }) => {
                         <Text style={pdf_style.badgeSubText}>
                             {isInvoice ? "SALES INVOICE" : "PRICE QUOTATION"}
                         </Text>
+                        {isInvoice && isTaxInclusive && (
+                            <Text style={[pdf_style.badgeSubText, {
+                                marginTop: 4,
+                                backgroundColor: "rgba(255,255,255,0.15)",
+                                borderRadius: 2,
+                                paddingHorizontal: 4,
+                                paddingVertical: 1,
+                            }]}>
+                                TAX INCLUSIVE
+                            </Text>
+                        )}
                     </View>
                 </View>
 
@@ -175,17 +232,51 @@ const DocumentPDF: React.FC<{ data: NormalizedDocumentData }> = ({ data }) => {
                 <View style={pdf_style.infoRow}>
                     <InfoBox title="BILL TO" lines={billLines} />
                     <InfoBox title="FROM" lines={fromLines} />
-
-
                 </View>
 
-
-
+                {/* ── PAYMENT DETAILS (invoice only) ──────────────────────── */}
+                {hasPaymentInfo && (
+                    <View style={pdf_style.paymentRow}>
+                        {!!payment_method && (
+                            <View style={pdf_style.paymentItem}>
+                                <Text style={pdf_style.paymentLabel}>PAYMENT METHOD</Text>
+                                <Text style={pdf_style.paymentValue}>
+                                    {safe(payment_method).replace(/_/g, " ").toUpperCase()}
+                                </Text>
+                            </View>
+                        )}
+                        {payment_reference && (
+                            <View style={[
+                                pdf_style.paymentItem,
+                                payment_method ? pdf_style.paymentItemBordered : {},
+                            ]}>
+                                <Text style={pdf_style.paymentLabel}>PAYMENT REFERENCE</Text>
+                                <Text style={pdf_style.paymentValue}>{safe(payment_reference)}</Text>
+                            </View>
+                        )}
+                        {payment_status && (
+                            <View style={[
+                                pdf_style.paymentItem,
+                                (payment_method || payment_reference) ? pdf_style.paymentItemBordered : {},
+                            ]}>
+                                <Text style={pdf_style.paymentLabel}>PAYMENT STATUS</Text>
+                                <View style={[
+                                    pdf_style.statusBadge,
+                                    { backgroundColor: paymentStatusColor(payment_status) },
+                                ]}>
+                                    <Text style={pdf_style.statusBadgeText}>
+                                        {safe(payment_status).replace(/_/g, " ").toUpperCase()}
+                                    </Text>
+                                </View>
+                            </View>
+                        )}
+                    </View>
+                )}
 
                 {/* ── ITEMS TABLE ─────────────────────────────────────────── */}
                 <View style={pdf_style.tableWrap}>
                     <View style={pdf_style.tableHead}>
-                        {ITEM_COLS.map((col) => (
+                        {columns.map((col) => (
                             <Text
                                 key={col.label}
                                 style={[pdf_style.tableHeadCell, { flex: col.flex, textAlign: col.align }]}
@@ -201,19 +292,7 @@ const DocumentPDF: React.FC<{ data: NormalizedDocumentData }> = ({ data }) => {
                         </View>
                     ) : (
                         items.map((item, idx) => {
-                            // Guard every single item field
-                            const desc = safe(item?.description);
-                            const note = item?.notes ? ` — ${safe(item.notes)}` : "";
-                            const vals = [
-                                String(idx + 1),
-                                desc + note,
-                                safe(item?.uom) === "—" ? "—" : safe(item?.uom),
-                                fmt(item?.quantity),
-                                `PKR ${fmt(item?.price)}`,
-                                `${fmt(item?.discount)}%`,
-                                `${fmt(item?.gst)}%`,
-                                `PKR ${fmt(item?.total)}`,
-                            ];
+                            const vals = itemCellValues(item, idx);
                             return (
                                 <View
                                     key={item?.id ?? idx}
@@ -221,7 +300,7 @@ const DocumentPDF: React.FC<{ data: NormalizedDocumentData }> = ({ data }) => {
                                         backgroundColor: idx % 2 === 0 ? C.white : C.brandX,
                                     }]}
                                 >
-                                    {ITEM_COLS.map((col, ci) => (
+                                    {columns.map((col, ci) => (
                                         <Text
                                             key={ci}
                                             style={[pdf_style.tableCell, { flex: col.flex, textAlign: col.align }]}
@@ -238,54 +317,26 @@ const DocumentPDF: React.FC<{ data: NormalizedDocumentData }> = ({ data }) => {
                 {/* ── TOTALS ──────────────────────────────────────────────── */}
                 <View style={pdf_style.totalsWrap}>
                     <View style={pdf_style.totalsInner}>
-                        {[
-                            { label: "Subtotal", val: `PKR ${fmt(totals.subtotal)}` },
-
-                            {
-                                label: "Item Discount",
-                                val: `- PKR ${fmt(totals.itemDiscount)} (${items.length ? 'varies per item' : '0%'})`
-                            },
-
-                            {
-                                label: "Item GST",
-                                val: `+ PKR ${fmt(totals.itemGST)} (${items.length ? 'varies per item' : '0%'})`
-                            },
-
-                            {
-                                label: "Header Discount",
-                                val: `- PKR ${fmt(headerDiscount)} (${fmt(discount)}%)`
-                            },
-
-                            {
-                                label: "Header GST",
-                                val: `+ PKR ${fmt(headerGSTAmount)} (${fmt(gst)}%)`
-                            },
-                        ].map((row) => (
+                        {totalRows.map((row) => (
                             <View key={row.label} style={pdf_style.totalRow}>
                                 <Text style={pdf_style.totalLabel}>{row.label}</Text>
                                 <Text style={pdf_style.totalVal}>{row.val}</Text>
                             </View>
                         ))}
-
                         <View style={pdf_style.grandBar}>
                             <Text style={pdf_style.grandLabel}>GRAND TOTAL</Text>
                             <Text style={pdf_style.grandVal}>PKR {fmt(grandTotal)}</Text>
                         </View>
-
-
                     </View>
                 </View>
 
                 {/* ── NOTES ───────────────────────────────────────────────── */}
-
-                {
-                    storeNotes ? (
-                        <View style={pdf_style.notesWrap}>
-                            <Text style={pdf_style.notesTitle}>{isInvoice ? "INVOICE NOTES" : "QUOTATION NOTES"}</Text>
-                            <Text style={pdf_style.notesBody}>{storeNotes}</Text>
-                        </View>
-                    ) : null
-                }
+                {storeNotes ? (
+                    <View style={pdf_style.notesWrap}>
+                        <Text style={pdf_style.notesTitle}>{isInvoice ? "INVOICE NOTES" : "QUOTATION NOTES"}</Text>
+                        <Text style={pdf_style.notesBody}>{storeNotes}</Text>
+                    </View>
+                ) : null}
 
                 {allNotes ? (
                     <View style={pdf_style.notesWrap}>
@@ -294,12 +345,11 @@ const DocumentPDF: React.FC<{ data: NormalizedDocumentData }> = ({ data }) => {
                     </View>
                 ) : null}
 
-
                 {/* ── FOOTER ──────────────────────────────────────────────── */}
                 <View style={pdf_style.footer} fixed>
                     <Text style={pdf_style.footerLeft}>
                         {isInvoice
-                            ? `Invoice Ref: ${safe(meta?.thirdField?.value)}. All prices in PKR inclusive of applicable taxes.`
+                            ? `Invoice Ref: ${safe(meta?.thirdField?.value)}. All prices in PKR${isTaxInclusive ? " — tax inclusive." : " inclusive of applicable taxes."}`
                             : `Quotation valid until ${fmtDate(meta?.thirdField?.value)}. Prices subject to change. E&OE.`
                         }
                     </Text>

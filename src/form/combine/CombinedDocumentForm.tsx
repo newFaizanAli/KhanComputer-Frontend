@@ -6,20 +6,22 @@ import {
 } from 'lucide-react'
 import type { CombinedDocumentFormValues, DocumentItem } from '../../types'
 import { ITEMUOM } from '../../constants'
-import { FormInput, FormSelect, FormSearchSelect, FormTextarea } from '../../components/form'
+import { FormInput, FormSelect, FormSearchSelect, FormTextarea, FormCheckbox } from '../../components/form'
 import { Alert, Button } from '../../components/ui'
 
 
 
 interface ExtraField {
-    type: 'search' | 'text' | 'date'
+    type: 'search' | 'text' | 'date' | 'select' | 'checkbox'
     name: keyof CombinedDocumentFormValues
     label: string
     placeholder?: string
-    // For search fields
+
+    options?: { value: string; label: string }[]    // search
     onSearch?: (q: string) => Promise<{ value: string; label: string }[]>
     linkedLabelField?: keyof CombinedDocumentFormValues
 }
+
 
 interface CombinedDocumentFormProps {
     title: string
@@ -53,6 +55,7 @@ const CombinedDocumentForm = ({
                 items: [{ ...defaultItem }],
                 valid_until: '', quotationId: null,
                 order_reference_no: '',
+                is_tax_inclusive: false,
             },
         })
 
@@ -120,27 +123,45 @@ const CombinedDocumentForm = ({
                 />
 
                 {/* Extra fields */}
-                {extraFields.map((field) =>
-                    field.type === 'search' ? (
-                        <FormSearchSelect<CombinedDocumentFormValues>
-                            key={field.name}
-                            label={field.label}
-                            placeholder={field.placeholder}
-                            icon={User}
-                            name={field.name}
-                            register={register}
-                            value={
-                                watch(field.name)
-                                    ? { value: watch(field.name) as string, label: watch(field.linkedLabelField!) as string || '' }
-                                    : null
-                            }
-                            onSearch={field.onSearch!}
-                            onChange={(opt) => {
-                                setValue(field.name, opt.value)
-                                if (field.linkedLabelField) setValue(field.linkedLabelField, opt.label)
-                            }}
-                        />
-                    ) : (
+                {extraFields.map((field) => {
+                    if (field.type === 'search') {
+                        return (
+                            <FormSearchSelect
+                                key={field.name}
+                                label={field.label}
+                                placeholder={field.placeholder}
+                                icon={User}
+                                name={field.name}
+                                register={register}
+                                value={
+                                    watch(field.name)
+                                        ? { value: watch(field.name) as string, label: watch(field.linkedLabelField!) as string || '' }
+                                        : null
+                                }
+                                onSearch={field.onSearch!}
+                                onChange={(opt) => {
+                                    setValue(field.name, opt.value)
+                                    if (field.linkedLabelField) setValue(field.linkedLabelField, opt.label)
+                                }}
+                            />
+                        )
+                    }
+
+                    if (field.type === 'select') {
+                        return (
+                            <FormSelect
+                                key={field.name}
+                                label={field.label}
+                                name={field.name}
+                                register={register}
+                                options={field.options || []}
+                            />
+                        )
+                    }
+
+
+
+                    return (
                         <FormInput
                             key={field.name}
                             type={field.type}
@@ -151,7 +172,15 @@ const CombinedDocumentForm = ({
                             register={register}
                         />
                     )
-                )}
+                })}
+
+                {/*  is sale inclusive */}
+
+                <FormCheckbox
+                    label="Tax inclusive"
+                    name="is_tax_inclusive"
+                    register={register}
+                />
 
                 {/* Date */}
                 <FormInput

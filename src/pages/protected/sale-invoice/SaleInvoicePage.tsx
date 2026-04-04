@@ -27,6 +27,10 @@ const SaleInvoicePage = () => {
         discount: 0,
         date: new Date().toISOString().split("T")[0],
         order_reference_no: "",
+        is_tax_inclusive: false,
+        payment_method: '',
+        payment_status: '',
+        payment_reference: '',
     }
 
     const [invoiceDefaults, setInvoiceDefaults] = useState<SaleInvoice>(defualtValues as SaleInvoice)

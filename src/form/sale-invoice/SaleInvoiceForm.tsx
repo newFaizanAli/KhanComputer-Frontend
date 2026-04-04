@@ -1,13 +1,14 @@
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form';
 import {
-    Calendar, FileCheck2, FileText, Hash, Percent,
+    Calendar, CreditCard, FileCheck2, FileText, Hash, HashIcon, Percent,
     User
 } from 'lucide-react';
 import type { SaleInvoice } from "../../types";
 import { useSaleInvoiceStore, useCustomerStore, useQuotationStore } from '../../store';
-import { FormInput, FormSearchSelect, FormTextarea } from '../../components/form';
+import { FormCheckbox, FormInput, FormSearchSelect, FormSelect, FormTextarea } from '../../components/form';
 import { Button } from '../../components/ui';
+import { PAYMENT_METHODS, PAYMENT_STATUS } from '../../constants';
 
 
 interface InvoiceProps {
@@ -156,6 +157,42 @@ const SaleInvoiceForm = ({ setModal, isEdit, defaultValues, handleClose }: Invoi
 
             </div>
 
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormSelect
+                    label="Payment Method"
+                    name="payment_method"
+                    icon={CreditCard}
+                    register={register}
+                    options={[{ value: null, label: "Select Payment Method" }, ...PAYMENT_METHODS]}
+                    rules={{ required: "Payment method required" }}
+                    error={errors.payment_method?.message}
+                />
+                <FormInput
+                    type="text"
+                    label="Payment Reference No."
+                    placeholder=" Enter payment reference no."
+                    icon={HashIcon}
+                    name="payment_reference"
+                    register={register}
+                />
+                <FormSelect
+                    label="Payment Status"
+                    name="payment_status"
+                    icon={FileCheck2}
+                    register={register}
+                    options={[{ value: null, label: "Select Payment Status" }, ...PAYMENT_STATUS]}
+                    rules={{ required: "Payment status required" }}
+                    error={errors.payment_status?.message}
+                />
+                <FormCheckbox
+                    label="Prices Inclusive of GST"
+                    name="is_tax_inclusive"
+                    register={register}
+                />
+            </div>
+
+
+
 
             <FormTextarea
                 label="Notes / Remarks"
@@ -171,7 +208,7 @@ const SaleInvoiceForm = ({ setModal, isEdit, defaultValues, handleClose }: Invoi
                     Cancel
                 </Button>
                 <Button type="submit" icon={FileCheck2}>
-                    {isEdit ? "Update Quotation" : "Create Quotation"}
+                    {isEdit ? "Update Invoice" : "Create Invoice"}
                 </Button>
             </div>
 

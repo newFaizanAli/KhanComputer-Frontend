@@ -27,6 +27,7 @@ const QuotationPage = () => {
         discount: 0,
         date: new Date().toISOString().split("T")[0],
         valid_until: "",
+        is_tax_inclusive: false
     }
 
     const [quotationDefaults, setQuotationDefaults] = useState<Quotation>(defualtValues as Quotation)
