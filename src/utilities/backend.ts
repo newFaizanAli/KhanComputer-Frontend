@@ -12,6 +12,7 @@ export const backendRoutes = {
   },
   store: {
     root: `${backendConfig.baseUrl}${backendConfig.apiPath}/store`,
+    letter_head: `${backendConfig.baseUrl}${backendConfig.apiPath}/store/letter-heads`,
   },
   user: {
     root: `${backendConfig.baseUrl}${backendConfig.apiPath}/user`,

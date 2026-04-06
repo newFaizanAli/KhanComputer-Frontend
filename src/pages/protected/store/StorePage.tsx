@@ -1,6 +1,6 @@
-import { StoreForm } from "../../form";
-import { PageHeader, SuspenseWrap } from "../../components/page";
-import { Card } from "../../components/ui";
+import { StoreForm } from "../../../form";
+import { PageHeader, SuspenseWrap } from "../../../components/page";
+import { Card } from "../../../components/ui";
 
 
 const StorePage = () => {

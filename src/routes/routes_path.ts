@@ -10,6 +10,10 @@ export interface RoutesPathProps {
     ROOT: string;
     STORE: {
       ROOT: string;
+      LETTER_HEAD: {
+        LIST: string;
+        FORM: string;
+      };
     };
     USER: {
       ROOT: string;
@@ -44,6 +48,10 @@ export const ROUTES_PATHS: RoutesPathProps = {
     ROOT: "/dashboard",
     STORE: {
       ROOT: "/dashboard/store",
+      LETTER_HEAD: {
+        FORM: "/dashboard/store/letter-head",
+        LIST: "/dashboard/store/letter-head/list",
+      },
     },
     USER: {
       ROOT: "/dashboard/users",

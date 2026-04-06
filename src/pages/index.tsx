@@ -9,7 +9,9 @@ const DashboardPage = lazy(() => import("./protected/Dashboard"));
 const AnalyticsPage = lazy(() => import("./protected/Analytics"));
 const UserPage = lazy(() => import("./protected/user/UserPage"));
 const CustomerPage = lazy(() => import("./protected/customer/CustomerPage"));
-const StorePage = lazy(() => import("./protected/StorePage"));
+const StorePage = lazy(() => import("./protected/store/StorePage"));
+const LetterHeadPage = lazy(() => import("./protected/store/LetterHeadPage"));
+const LetterHeadListPage = lazy(() => import("./protected/store/LetterHeadListPage"));
 const ProfilePage = lazy(() => import("./protected/ProfilePage"));
 const QuotationPage = lazy(() => import("./protected/quotation/QuotationPage"));
 const QuotationItemPage = lazy(() => import("./protected/quotation/QuotationItem"));
@@ -26,6 +28,8 @@ export {
     UserPage,
     CustomerPage,
     StorePage,
+    LetterHeadPage,
+    LetterHeadListPage,
     ProfilePage,
     QuotationPage,
     QuotationItemPage,

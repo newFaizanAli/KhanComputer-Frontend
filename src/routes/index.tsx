@@ -3,10 +3,8 @@ import { ROUTES_PATHS } from "./routes_path"
 import { MainLayout, ProtectedLayout } from "../layout"
 import {
     SignInPage, DashboardPage, AnalyticsPage, UserPage, NotFound, CustomerPage, StorePage,
-    QuotationPage, QuotationItemPage, CombinedQuotationPage,
-    SaleInvoicePage, SaleInvoiceItemPage,
-    CombinedSaleInvoicePage,
-    ProfilePage
+    QuotationPage, QuotationItemPage, CombinedQuotationPage, LetterHeadPage, LetterHeadListPage,
+    SaleInvoicePage, SaleInvoiceItemPage, CombinedSaleInvoicePage, ProfilePage
 } from "../pages";
 
 
@@ -33,6 +31,8 @@ const appRoutes: {
                 { path: ROUTES_PATHS.DASHBOARD.USER.ROOT, element: <UserPage /> },
                 { path: ROUTES_PATHS.ANALYTICS.ROOT, element: <AnalyticsPage /> },
                 { path: ROUTES_PATHS.DASHBOARD.STORE.ROOT, element: <StorePage /> },
+                { path: ROUTES_PATHS.DASHBOARD.STORE.LETTER_HEAD.LIST, element: <LetterHeadListPage /> },
+                { path: ROUTES_PATHS.DASHBOARD.STORE.LETTER_HEAD.FORM, element: <LetterHeadPage /> },
                 { path: ROUTES_PATHS.AUTH.PROFILE, element: <ProfilePage /> },
                 { path: ROUTES_PATHS.DASHBOARD.CUSTOMER.ROOT, element: <CustomerPage /> },
                 { path: ROUTES_PATHS.DASHBOARD.QUOTATION.ROOT, element: <QuotationPage /> },

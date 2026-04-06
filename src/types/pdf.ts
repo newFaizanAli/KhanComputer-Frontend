@@ -5,6 +5,7 @@ import type {
   QuotationItem,
   StoreInfo,
   SaleInvoiceItem,
+  LetterHead,
 } from "./index";
 
 export interface DocumentMeta {
@@ -36,4 +37,15 @@ export interface NormalizedDocumentData {
   payment_status?: string | null;
   /** The quotation this invoice was raised from */
   quotation_code?: string | null;
+}
+
+// ── Letterhead ────────────────────────────────────────────────────────────────
+
+export interface NormalizedLetterheadData {
+  /** The letterhead record itself */
+  letterhead: LetterHead;
+  /** Store info for header/footer branding */
+  store: StoreInfo | null;
+  /** Optional free-form body override — if not set, letterhead.default_body is used */
+  body?: string | null;
 }

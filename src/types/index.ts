@@ -12,7 +12,12 @@ import type {
   Quotation,
   QuotationItem,
 } from "./base";
-import type { NormalizedDocumentData, DocumentMeta } from "./pdf";
+import type { LetterHead } from "./letterhead";
+import type {
+  NormalizedDocumentData,
+  NormalizedLetterheadData,
+  DocumentMeta,
+} from "./pdf";
 
 export type {
   StoreInfo,
@@ -24,7 +29,9 @@ export type {
   Quotation,
   QuotationItem,
   NormalizedDocumentData,
+  NormalizedLetterheadData,
   DocumentMeta,
   DocumentItem,
+  LetterHead,
   CombinedDocumentFormValues,
 };

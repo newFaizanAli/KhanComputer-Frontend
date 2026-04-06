@@ -8,9 +8,12 @@ import CombinedQuotationForm from "./quotation/CombinedQuotationForm";
 import SaleInvoiceForm from "./sale-invoice/SaleInvoiceForm";
 import SaleInvoiceItemForm from "./sale-invoice/SaleInvoiceItemForm";
 import CombinedSaleInvoiceForm from "./sale-invoice/CombinedSaleForm";
+import LetterHeadForm from "./LetterHeadForm";
+
 
 export {
-    UserForm, StoreForm, ProfileForm, CustomerForm,
+    UserForm, StoreForm, ProfileForm, CustomerForm, LetterHeadForm,
     QuotationForm, QuotationItemForm, CombinedQuotationForm,
-    SaleInvoiceForm, SaleInvoiceItemForm, CombinedSaleInvoiceForm
+    SaleInvoiceForm, SaleInvoiceItemForm, CombinedSaleInvoiceForm,
+
 };

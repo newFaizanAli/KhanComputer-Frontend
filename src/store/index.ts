@@ -7,6 +7,7 @@ import useQuotationItemStore from "./quotation/item";
 import useSaleInvoiceStore from "./sale-invoice";
 import useSaleInvoiceItemStore from "./sale-invoice/item";
 import useProfileStore from "./profile";
+import useLetterHeadStore from "./letterheader";
 
 export {
   useAuthStore,
@@ -17,5 +18,6 @@ export {
   useQuotationItemStore,
   useSaleInvoiceStore,
   useSaleInvoiceItemStore,
-  useProfileStore
+  useProfileStore,
+  useLetterHeadStore,
 };

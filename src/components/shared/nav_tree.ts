@@ -8,7 +8,8 @@ import {
   FileCheck,
   Receipt,
   Files,
-  User2, // ✅ added
+  User2,
+  FileSignature,
 } from "lucide-react";
 
 import { ROUTES_PATHS } from "../../routes/routes_path";
@@ -50,6 +51,12 @@ const NAV_TREE = [
         label: "Store Information",
         icon: Store,
         route: ROUTES_PATHS.DASHBOARD.STORE.ROOT,
+      },
+      {
+        id: "letter_head",
+        label: "Letter Head",
+        icon: FileSignature,
+        route: ROUTES_PATHS.DASHBOARD.STORE.LETTER_HEAD.LIST,
       },
     ],
   },
