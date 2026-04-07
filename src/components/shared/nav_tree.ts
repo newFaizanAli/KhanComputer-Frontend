@@ -33,14 +33,13 @@ const NAV_TREE = [
     id: "user_module",
     label: "User",
     icon: Users,
-    roles: ["admin"],
+
     children: [
       {
         id: "user_management",
         label: "User Management",
         icon: User2,
         route: ROUTES_PATHS.DASHBOARD.USER.ROOT,
-        roles: ["admin"],
       },
     ],
   },
@@ -48,21 +47,19 @@ const NAV_TREE = [
     id: "store_info",
     label: "Store Info",
     icon: Store,
-    roles: ["admin"],
+
     children: [
       {
         id: "store_information",
         label: "Store Information",
         icon: Store,
         route: ROUTES_PATHS.DASHBOARD.STORE.ROOT,
-        roles: ["admin"],
       },
       {
         id: "letter_head",
         label: "Letter Head",
         icon: FileSignature,
         route: ROUTES_PATHS.DASHBOARD.STORE.LETTER_HEAD.LIST,
-        roles: ["admin"],
       },
     ],
   },
@@ -70,13 +67,13 @@ const NAV_TREE = [
     id: "customer_module",
     label: "Customer",
     icon: Users,
-    roles: ["admin"],
+
     children: [
       {
         id: "customer",
         label: "Customer",
         icon: User,
-        roles: ["admin"],
+
         route: ROUTES_PATHS.DASHBOARD.CUSTOMER.ROOT,
       },
     ],
