@@ -1,6 +1,6 @@
 import type { ReactNode } from "react"
 import { ROUTES_PATHS } from "./routes_path"
-import { MainLayout, ProtectedLayout } from "../layout"
+import { MainLayout, ProtectedLayout, RoleProtected } from "../layout"
 import {
     SignInPage, DashboardPage, AnalyticsPage, UserPage, NotFound, CustomerPage, StorePage,
     QuotationPage, QuotationItemPage, CombinedQuotationPage, LetterHeadPage, LetterHeadListPage,
@@ -11,6 +11,7 @@ import {
 const appRoutes: {
     path: string,
     element: ReactNode,
+
     children?: {
         path: string,
         element: ReactNode
@@ -28,13 +29,13 @@ const appRoutes: {
             element: <ProtectedLayout />,
             children: [
                 { path: ROUTES_PATHS.DASHBOARD.ROOT, element: <DashboardPage /> },
-                { path: ROUTES_PATHS.DASHBOARD.USER.ROOT, element: <UserPage /> },
+                { path: ROUTES_PATHS.DASHBOARD.USER.ROOT, element: <RoleProtected allow={["admin"]}><UserPage /></RoleProtected> },
                 { path: ROUTES_PATHS.ANALYTICS.ROOT, element: <AnalyticsPage /> },
-                { path: ROUTES_PATHS.DASHBOARD.STORE.ROOT, element: <StorePage /> },
+                { path: ROUTES_PATHS.DASHBOARD.STORE.ROOT, element: <RoleProtected allow={["admin"]}><StorePage /></RoleProtected> },
                 { path: ROUTES_PATHS.DASHBOARD.STORE.LETTER_HEAD.LIST, element: <LetterHeadListPage /> },
                 { path: ROUTES_PATHS.DASHBOARD.STORE.LETTER_HEAD.FORM, element: <LetterHeadPage /> },
                 { path: ROUTES_PATHS.AUTH.PROFILE, element: <ProfilePage /> },
-                { path: ROUTES_PATHS.DASHBOARD.CUSTOMER.ROOT, element: <CustomerPage /> },
+                { path: ROUTES_PATHS.DASHBOARD.CUSTOMER.ROOT, element: <RoleProtected allow={["admin"]}><CustomerPage /></RoleProtected> },
                 { path: ROUTES_PATHS.DASHBOARD.QUOTATION.ROOT, element: <QuotationPage /> },
                 { path: ROUTES_PATHS.DASHBOARD.QUOTATION.ITEM, element: <QuotationItemPage /> },
                 { path: ROUTES_PATHS.DASHBOARD.QUOTATION.COMBINED, element: <CombinedQuotationPage /> },

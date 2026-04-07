@@ -3,8 +3,9 @@ import { Lock, Mail, UserCheck, Users } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import type { User } from '../types';
 import { useUserStore } from '../store';
-import { FormInput } from '../components/form';
+import { FormInput, FormSelect } from '../components/form';
 import { Button } from '../components/ui';
+import { USER_ROLES } from '../constants';
 
 
 
@@ -55,6 +56,16 @@ const UserForm = ({ setModal, isEdit, defaultValues, handleClose }: UserFormProp
             <FormInput label="Full Name" placeholder="John Doe" icon={Users} name="name" register={register} rules={{ required: "Name required" }} error={errors.name?.message} />
             <FormInput label="Email" placeholder="user@kcn.io" icon={Mail} type="email" name="email" register={register}
                 rules={{ required: "Email required", pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: "Invalid email" } }} error={errors.email?.message} />
+
+            <FormSelect
+                label="Role"
+                name="role"
+                icon={Users}
+                register={register}
+                options={[{ value: null, label: "Select Role" }, ...USER_ROLES]}
+                rules={{ required: "Role required" }}
+                error={errors.role?.message}
+            />
 
             {
                 !isEdit &&

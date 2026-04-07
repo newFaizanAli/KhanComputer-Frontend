@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { EyeIcon, Pencil, Trash2 } from "lucide-react";
+import { useAuthStore } from "../../store";
 
 type Column = {
     key: string;
@@ -15,6 +16,7 @@ type DataTableProps = {
     onView?: (row: any) => void;
     rowKey?: string;
     searchKeys?: string[]; // 🔥 which keys to search in (e.g. ["name", "email"])
+
 };
 
 const DataTable = ({
@@ -25,7 +27,15 @@ const DataTable = ({
     onView,
     rowKey = "id",
     searchKeys = [], // default empty
+
 }: DataTableProps) => {
+
+    const { current_user } = useAuthStore();
+    const role = current_user?.role;
+    const canEdit = role === "admin";
+    const canDelete = role === "admin";
+    const canView = !!onView;
+
     const [searchQuery, setSearchQuery] = useState("");
 
     // 🔥 Filtered data based on search
@@ -68,7 +78,7 @@ const DataTable = ({
                                     {col.label}
                                 </th>
                             ))}
-                            {(onEdit || onDelete || onView) && (
+                            {(canView || (canEdit && onEdit) || (canDelete && onDelete)) && (
                                 <th className="px-5 py-3 text-slate-500 text-xs uppercase text-right font-semibold">
                                     Actions
                                 </th>
@@ -102,7 +112,7 @@ const DataTable = ({
                                                         <EyeIcon size={16} />
                                                     </button>
                                                 )}
-                                                {onEdit && (
+                                                {(onEdit && canEdit) && (
                                                     <button
                                                         onClick={() => onEdit(row)}
                                                         className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-cyan-400 hover:bg-cyan-500/10 transition-colors"
@@ -110,7 +120,7 @@ const DataTable = ({
                                                         <Pencil size={16} />
                                                     </button>
                                                 )}
-                                                {onDelete && (
+                                                {(onDelete && canDelete) && (
                                                     <button
                                                         onClick={() => onDelete(row)}
                                                         className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-colors"
@@ -126,7 +136,7 @@ const DataTable = ({
                         ) : (
                             <tr>
                                 <td
-                                    colSpan={columns?.length! + (onEdit || onDelete || onView ? 1 : 0)}
+                                    colSpan={columns?.length! + ((onEdit && canEdit) || (onDelete && canDelete) || onView ? 1 : 0)}
                                     className="py-10 text-center text-slate-400 text-sm font-medium"
                                 >
                                     No records found

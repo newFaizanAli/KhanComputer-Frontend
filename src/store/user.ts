@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import axios from "axios";
 import type { User } from "../types";
 import { backendRoutes } from "../utilities/backend";
 import { toastError, toastSuccess } from "../utilities/toast_message";
@@ -55,7 +54,7 @@ const useUserStore = create<UserStore>((set) => ({
 
   addUser: async (userData: User) => {
     try {
-      const resp = await axios.post(backendRoutes.auth.register, userData);
+      const resp = await api.post(backendRoutes.auth.register, userData);
       const message = resp.data.message || "";
 
       if (resp.data.success) {
@@ -81,7 +80,7 @@ const useUserStore = create<UserStore>((set) => ({
 
   editUser: async (id: string, userData: User) => {
     try {
-      const resp = await axios.put(`${backendRoutes.user}/${id}`, userData);
+      const resp = await api.put(`${URL}/${id}`, userData);
       const message = resp.data.message || "";
 
       if (resp.data.success) {

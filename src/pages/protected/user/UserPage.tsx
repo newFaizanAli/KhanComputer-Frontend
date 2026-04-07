@@ -18,6 +18,7 @@ const UserPage = () => {
         name: "",
         email: "",
         password: "",
+        role: "subadmin"
     }
 
     const [userDefaults, setUserDefaults] = useState<User>(defaultValues as User)
@@ -61,6 +62,7 @@ const UserPage = () => {
                             )
                         },
                         { key: "email", label: "Email", render: (v: string) => <span className="text-slate-400">{v}</span> },
+                        { key: "role", label: "Role", render: (v: string) => <span className="text-slate-400">{v}</span> },
                     ]}
                     data={users}
                     onEdit={(r: User) => handleEdit(r)}

@@ -2,8 +2,8 @@ import { useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { useAuthStore } from "../../../store";
 import { ChevronDown, ChevronLeft, ChevronRight, Globe } from "lucide-react";
-import NAV_TREE from "../nav_tree";
 import { ROUTES_PATHS } from "../../../routes/routes_path";
+import { useFilteredNav } from "../../../hooks/useFilteredNav";
 
 interface SidebarProps {
   collapsed: boolean;
@@ -17,6 +17,9 @@ interface SidebarItemProps {
 function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
   const { current_user } = useAuthStore();
   const location = useLocation();
+
+
+  const NAV_TREE = useFilteredNav();
 
   const isActiveRoute = (route?: string) => {
     return location.pathname === route;

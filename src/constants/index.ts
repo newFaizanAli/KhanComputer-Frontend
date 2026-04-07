@@ -88,3 +88,12 @@ export const PAYMENT_STATUS: {
   { value: "OVERDUE", label: "Overdue" },
   { value: "PARTIAL", label: "Partial Payment" },
 ];
+
+export const USER_ROLES: {
+  value: string;
+  label: string;
+}[] = [
+  // 🔹 Basic Units (MOST USED)
+  { value: "admin", label: "Admin User" },
+  { value: "subadmin", label: "Sub-Admin User" },
+];

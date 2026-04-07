@@ -2,10 +2,6 @@ import { BrowserRouter as Router, useRoutes } from 'react-router-dom';
 import { ToastProvider } from './components/shared';
 import appRoutes from './routes';
 
-
-
-
-
 function App() {
 
   function AppRoutes() {
