@@ -31,7 +31,9 @@ function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
 
     NAV_TREE.forEach((group) => {
 
-      state[group.id] = group.children.some((child) => pathname.startsWith(child.route || ""));
+      state[group.id] = group.children.some((child: {
+        route?: string;
+      }) => pathname.startsWith(child.route || ""));
     });
 
     return state;
@@ -88,7 +90,12 @@ function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
 
               {/* Items */}
               {(isOpen || collapsed) &&
-                group.children.map((item) => {
+                group.children.map((item: {
+                  id: string;
+                  label: string;
+                  icon: React.ElementType;
+                  route?: string;
+                }) => {
                   // const isActive = active === item.id;
                   const isActive = isActiveRoute(item.route);
                   return (
