@@ -6,6 +6,7 @@ import {
     QuotationPage, QuotationItemPage, CombinedQuotationPage, LetterHeadPage, LetterHeadListPage,
     SaleInvoicePage, SaleInvoiceItemPage, CombinedSaleInvoicePage, ProfilePage
 } from "../pages";
+import RoleGuard from "../components/shared/RoleGuard";
 
 
 const appRoutes: {
@@ -29,11 +30,11 @@ const appRoutes: {
             element: <ProtectedLayout />,
             children: [
                 { path: ROUTES_PATHS.DASHBOARD.ROOT, element: <DashboardPage /> },
-                { path: ROUTES_PATHS.DASHBOARD.USER.ROOT, element: <UserPage /> },
+                { path: ROUTES_PATHS.DASHBOARD.USER.ROOT, element: <RoleGuard path={ROUTES_PATHS.DASHBOARD.USER.ROOT}><UserPage /></RoleGuard> },
                 { path: ROUTES_PATHS.ANALYTICS.ROOT, element: <AnalyticsPage /> },
-                { path: ROUTES_PATHS.DASHBOARD.STORE.ROOT, element: <StorePage /> },
-                { path: ROUTES_PATHS.DASHBOARD.STORE.LETTER_HEAD.LIST, element: <LetterHeadListPage /> },
-                { path: ROUTES_PATHS.DASHBOARD.STORE.LETTER_HEAD.FORM, element: <LetterHeadPage /> },
+                { path: ROUTES_PATHS.DASHBOARD.STORE.ROOT, element: <RoleGuard path={ROUTES_PATHS.DASHBOARD.STORE.ROOT}><StorePage /></RoleGuard> },
+                { path: ROUTES_PATHS.DASHBOARD.STORE.LETTER_HEAD.LIST, element: <RoleGuard path={ROUTES_PATHS.DASHBOARD.STORE.LETTER_HEAD.LIST}><LetterHeadListPage /></RoleGuard> },
+                { path: ROUTES_PATHS.DASHBOARD.STORE.LETTER_HEAD.FORM, element: <RoleGuard path={ROUTES_PATHS.DASHBOARD.STORE.LETTER_HEAD.FORM}><LetterHeadPage /></RoleGuard> },
                 { path: ROUTES_PATHS.AUTH.PROFILE, element: <ProfilePage /> },
                 { path: ROUTES_PATHS.DASHBOARD.CUSTOMER.ROOT, element: <CustomerPage /> },
                 { path: ROUTES_PATHS.DASHBOARD.QUOTATION.ROOT, element: <QuotationPage /> },

@@ -4,6 +4,7 @@ import { useAuthStore } from "../../../store";
 import { ChevronDown, ChevronLeft, ChevronRight, Globe } from "lucide-react";
 import { ROUTES_PATHS } from "../../../routes/routes_path";
 import NAV_TREE from "../nav_tree";
+import { usePermissions } from "../../../hooks/usePermissions";
 
 interface SidebarProps {
   collapsed: boolean;
@@ -16,6 +17,7 @@ interface SidebarItemProps {
 
 function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
   const { current_user } = useAuthStore();
+  const { isAdmin } = usePermissions();
   const location = useLocation();
 
 
@@ -42,6 +44,7 @@ function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
   const [open, setOpen] = useState<SidebarItemProps>(() => getInitialOpenState(location.pathname));
 
   const toggle = (id: string) => setOpen((p) => ({ ...p, [id]: !p[id] }));
+
 
 
 
@@ -90,7 +93,13 @@ function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
 
               {/* Items */}
               {(isOpen || collapsed) &&
-                group.children.map((item: {
+                group.children.filter((child: { // group.children.map
+                  id: string;
+                  label: string;
+                  icon: React.ElementType;
+                  route?: string;
+                  adminOnly?: boolean;
+                }) => isAdmin || !child.adminOnly).map((item: {
                   id: string;
                   label: string;
                   icon: React.ElementType;

@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { EyeIcon, Pencil, Trash2 } from "lucide-react";
+import { usePermissions } from "../../hooks/usePermissions";
 
 type Column = {
     key: string;
@@ -33,6 +34,8 @@ const DataTable = ({
     const canView = !!onView;
 
     const [searchQuery, setSearchQuery] = useState("");
+
+    const { canDelete, canEdit } = usePermissions();
 
     // 🔥 Filtered data based on search
     const filteredData = useMemo(() => {
@@ -74,7 +77,7 @@ const DataTable = ({
                                     {col.label}
                                 </th>
                             ))}
-                            {(canView || onEdit || onDelete) && (
+                            {(canView || (onEdit && canEdit) || (onDelete && canDelete)) && (
                                 <th className="px-5 py-3 text-slate-500 text-xs uppercase text-right font-semibold">
                                     Actions
                                 </th>
@@ -97,7 +100,7 @@ const DataTable = ({
                                         </td>
                                     ))}
 
-                                    {(onEdit || onDelete || onView) && (
+                                    {((onEdit && canEdit) || (onDelete && canDelete) || onView) && (
                                         <td className="px-5 py-3 text-right">
                                             <div className="flex items-center justify-end gap-2">
                                                 {onView && (
@@ -108,7 +111,7 @@ const DataTable = ({
                                                         <EyeIcon size={16} />
                                                     </button>
                                                 )}
-                                                {(onEdit) && (
+                                                {(onEdit && canEdit) && (
                                                     <button
                                                         onClick={() => onEdit(row)}
                                                         className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-cyan-400 hover:bg-cyan-500/10 transition-colors"
@@ -116,7 +119,7 @@ const DataTable = ({
                                                         <Pencil size={16} />
                                                     </button>
                                                 )}
-                                                {(onDelete) && (
+                                                {(onDelete && canDelete) && (
                                                     <button
                                                         onClick={() => onDelete(row)}
                                                         className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-colors"

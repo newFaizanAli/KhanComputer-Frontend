@@ -1,6 +1,6 @@
 export const backendConfig = {
-  // baseUrl: "http://localhost:3000",
-  baseUrl: "https://khan-computer-backend.vercel.app",
+  baseUrl: "http://localhost:3000",
+  // baseUrl: "https://khan-computer-backend.vercel.app",
   apiPath: "/api",
 };
 
