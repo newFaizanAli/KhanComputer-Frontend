@@ -16,7 +16,7 @@ export interface DocumentMeta {
 }
 
 export interface NormalizedDocumentData {
-  docType: "QUOTATION" | "INVOICE";
+  docType: "QUOTATION" | "INVOICE" | "GENERAL_INVOICE";
   meta: DocumentMeta;
   customer: Customer | null;
   store: StoreInfo | null;

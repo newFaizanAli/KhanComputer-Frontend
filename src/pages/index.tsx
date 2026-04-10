@@ -19,6 +19,8 @@ const CombinedQuotationPage = lazy(() => import("./protected/quotation/CombinedQ
 const SaleInvoicePage = lazy(() => import("./protected/sale-invoice/SaleInvoicePage"));
 const SaleInvoiceItemPage = lazy(() => import("./protected/sale-invoice/SaleInvoiceItem"));
 const CombinedSaleInvoicePage = lazy(() => import("./protected/sale-invoice/CombinedSaleInvoice"));
+const GeneralSaleInvoice = lazy(() => import("./protected/general-invoice/GeneralSaleInvoice"));
+
 
 export {
     SignInPage,
@@ -36,5 +38,6 @@ export {
     CombinedQuotationPage,
     SaleInvoicePage,
     SaleInvoiceItemPage,
-    CombinedSaleInvoicePage
+    CombinedSaleInvoicePage,
+    GeneralSaleInvoice
 }

@@ -4,7 +4,6 @@ interface BaseDocument {
   code?: string;
   notes: string;
   date: string;
-  gst: number;
   discount: number;
   totalAmount?: number;
   customerName?: string;
@@ -18,7 +17,6 @@ interface BaseItem {
   description: string;
   quantity: number;
   price: number;
-  gst: number;
   discount: number;
   notes: string;
   total: number;
@@ -33,19 +31,43 @@ export interface SaleInvoice extends BaseDocument {
   is_tax_inclusive: boolean;
   quotationId?: string;
   quotationCode?: string | null;
+  gst: number;
 }
 
 export interface SaleInvoiceItem extends BaseItem {
   saleInvoiceId?: string;
   saleInvoiceCode?: string;
+  gst: number;
 }
 
 export interface Quotation extends BaseDocument {
   valid_until: string;
   is_tax_inclusive: boolean;
+  gst: number;
 }
 
 export interface QuotationItem extends BaseItem {
   quotationId?: string;
   quotationCode?: string;
+  gst: number;
+}
+
+export interface GeneralSaleInvoice extends BaseDocument {
+  order_reference_no: string;
+  payment_method: string;
+  payment_reference: string;
+  customerPhno: string;
+}
+
+export interface GeneralSaleInvoiceData {
+  customerId: null;
+  customerName: string;
+  customerPhno?: string;
+  date: string;
+  discount: number;
+  notes: string;
+  order_reference_no?: string;
+  payment_method?: string;
+  payment_reference?: string;
+  items: BaseItem[];
 }

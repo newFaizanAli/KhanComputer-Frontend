@@ -9,9 +9,10 @@ import type {
     Customer, StoreInfo,
     Quotation, QuotationItem,
     SaleInvoice, SaleInvoiceItem,
+    GeneralSaleInvoiceData,
 } from "../types";
 
-// ── Adapters (inlined — no external import needed) ───────────────────────────
+// ── Adapters ─────────────────────────────────────────────────────────────────
 
 const fromQuotation = (
     quotation: Quotation,
@@ -23,10 +24,7 @@ const fromQuotation = (
     meta: {
         code: quotation?.code ?? "—",
         date: quotation?.date ?? "",
-        thirdField: {
-            label: "VALID UNTIL",
-            value: quotation?.valid_until ?? "—",
-        },
+        thirdField: { label: "VALID UNTIL", value: quotation?.valid_until ?? "—" },
     },
     customer: customer ?? null,
     store: store ?? null,
@@ -47,10 +45,7 @@ const fromInvoice = (
     meta: {
         code: invoice?.code ?? "—",
         date: invoice?.date ?? "",
-        thirdField: {
-            label: "ORDER REF. NO.",
-            value: invoice?.order_reference_no ?? "—",
-        },
+        thirdField: { label: "ORDER REF. NO.", value: invoice?.order_reference_no ?? "—" },
     },
     customer: customer ?? null,
     store: store ?? null,
@@ -59,44 +54,111 @@ const fromInvoice = (
     gst: Number(invoice?.gst ?? 0),
     notes: invoice?.notes ?? "",
     is_tax_inclusive: invoice?.is_tax_inclusive ?? false,
-    // Extra invoice-only fields
     payment_method: invoice?.payment_method ?? null,
     payment_reference: invoice?.payment_reference ?? null,
     payment_status: invoice?.payment_status ?? null,
     quotation_code: invoice?.quotationCode ?? null,
 });
 
+// ── General sale invoice adapter — no backend fetch, raw form data ─────────
+const fromGeneralSaleInvoice = (
+    raw: GeneralSaleInvoiceData,
+    store: StoreInfo | null,
+): NormalizedDocumentData => ({
+    docType: "GENERAL_INVOICE",
+    meta: {
+        code: "",                           // no stored code
+        date: raw.date ?? "",
+        thirdField: {
+            label: "ORDER REF. NO.",
+            value: raw.order_reference_no || "—",
+        },
+    },
+    // Build a minimal customer shape from the raw fields
+    customer: {
+        name: raw.customerName ?? "",
+        phone: raw.customerPhno ?? null,
+        address: "",
+        email: "",
+        gst: '',
+        ntn: "",
+    } as Customer,
+    store: store ?? null,
+    items: (raw.items ?? []).map(item => ({
+        ...item,
+        gst: 0,             // no tax on general invoices
+    })),
+    discount: Number(raw.discount ?? 0),
+    gst: 0,                 // no order-level GST
+    notes: raw.notes ?? "",
+    is_tax_inclusive: false,
+    payment_method: raw.payment_method ?? null,
+    payment_reference: raw.payment_reference ?? null,
+    payment_status: null,   // general invoice has no payment_status
+    quotation_code: null,
+});
+
 // ── Types ────────────────────────────────────────────────────────────────────
 
-type DocVariant = "quotation" | "invoice";
+type DocVariant = "quotation" | "invoice" | "general-invoice";
 
-interface Props {
-    id: string;
+interface BaseProps {
     variant: DocVariant;
-    previewUrl: string;
     onClose: () => void;
+    store?: StoreInfo | null;       // pass in for general-invoice (already in scope)
 }
+
+// Fetched variants need an id + previewUrl
+interface FetchedProps extends BaseProps {
+    variant: "quotation" | "invoice";
+    id: string;
+    previewUrl: string;
+    data?: never;
+}
+
+// General invoice is passed directly — no fetch
+interface DirectProps extends BaseProps {
+    variant: "general-invoice";
+    data: GeneralSaleInvoiceData;
+    id?: never;
+    previewUrl?: never;
+}
+
+type Props = FetchedProps | DirectProps;
 
 const LABELS: Record<DocVariant, string> = {
     quotation: "Quotation Preview",
     invoice: "Invoice Preview",
+    "general-invoice": "General Sale Invoice Preview",
 };
 
 // ── Component ────────────────────────────────────────────────────────────────
 
-const DocumentPDFViewer: React.FC<Props> = ({ id, variant, previewUrl, onClose }) => {
-    const [data, setData] = useState<NormalizedDocumentData | null>(null);
+const DocumentPDFViewer: React.FC<Props> = (props) => {
+    const { variant, onClose, store = null } = props;
+
+    const [normalizedData, setNormalizedData] = useState<NormalizedDocumentData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
+        // ── General invoice: normalize immediately, no fetch needed ──────────
+        if (variant === "general-invoice") {
+            const { data } = props as DirectProps;
+            setNormalizedData(fromGeneralSaleInvoice(data, store));
+            setLoading(false);
+            return;
+        }
+
+        // ── Fetched variants ─────────────────────────────────────────────────
+        const { id, previewUrl } = props as FetchedProps;
         const controller = new AbortController();
 
         const fetchData = async () => {
             try {
                 setLoading(true);
                 setError(null);
-                setData(null);
+                setNormalizedData(null);
 
                 const res = await api.get(`${previewUrl}/preview/${id}`, {
                     signal: controller.signal,
@@ -115,13 +177,11 @@ const DocumentPDFViewer: React.FC<Props> = ({ id, variant, previewUrl, onClose }
                     throw new Error("Invoice data missing in response.");
                 }
 
-                const normalized: NormalizedDocumentData =
+                setNormalizedData(
                     variant === "quotation"
                         ? fromQuotation(d.quotation, d.customer ?? null, d.store ?? null, d.items ?? [])
-                        : fromInvoice(d.invoice, d.customer ?? null, d.store ?? null, d.items ?? []);
-
-                setData(normalized);
-
+                        : fromInvoice(d.invoice, d.customer ?? null, d.store ?? null, d.items ?? [])
+                );
             } catch (err: unknown) {
                 if (err instanceof Error && (err.name === "CanceledError" || err.name === "AbortError")) return;
                 setError(err instanceof Error ? err.message : "An unexpected error occurred.");
@@ -133,7 +193,7 @@ const DocumentPDFViewer: React.FC<Props> = ({ id, variant, previewUrl, onClose }
         fetchData();
         return () => controller.abort();
 
-    }, [id, variant, previewUrl]);
+    }, [variant]);      // variant is stable; direct data changes handled by caller remounting
 
     useEffect(() => {
         const handleKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
@@ -162,7 +222,6 @@ const DocumentPDFViewer: React.FC<Props> = ({ id, variant, previewUrl, onClose }
 
             {/* Content */}
             <div style={{ flex: 1, overflow: "hidden" }}>
-
                 {loading && (
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", gap: 12 }}>
                         <div style={{ width: 32, height: 32, border: "3px solid rgba(255,255,255,0.2)", borderTopColor: "#00b4d8", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
@@ -175,7 +234,7 @@ const DocumentPDFViewer: React.FC<Props> = ({ id, variant, previewUrl, onClose }
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", gap: 12 }}>
                         <span style={{ color: "#f87171", fontSize: 15 }}>⚠ {error}</span>
                         <button
-                            onClick={() => { setError(null); setLoading(true); setData(null); }}
+                            onClick={() => { setError(null); setLoading(true); setNormalizedData(null); }}
                             style={{ padding: "6px 18px", backgroundColor: "#1a3c5e", color: "#fff", border: "1px solid #00b4d8", borderRadius: 4, cursor: "pointer", fontSize: 13 }}
                         >
                             Retry
@@ -183,9 +242,9 @@ const DocumentPDFViewer: React.FC<Props> = ({ id, variant, previewUrl, onClose }
                     </div>
                 )}
 
-                {!loading && !error && data && (
+                {!loading && !error && normalizedData && (
                     <PDFViewer width="100%" height="100%" showToolbar>
-                        <DocumentPDF data={data} />
+                        <DocumentPDF data={normalizedData} />
                     </PDFViewer>
                 )}
             </div>

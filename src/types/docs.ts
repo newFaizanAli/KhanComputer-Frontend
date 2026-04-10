@@ -17,6 +17,7 @@ export interface DocumentItem {
 export interface CombinedDocumentFormValues {
   customerId: string | null;
   customerName?: string;
+  customerPhno?: string;
   date: string;
   discount: number;
   gst: number;

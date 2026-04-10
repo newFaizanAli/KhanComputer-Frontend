@@ -103,13 +103,19 @@ const NAV_TREE = [
   {
     id: "sale_module",
     label: "Sale Invoice",
-    icon: Receipt, // 🔥 best choice
+    icon: Receipt,
     children: [
       {
         id: "invoice",
         label: "Sale Invoice",
         icon: FileCheck,
         route: ROUTES_PATHS.DASHBOARD.SALE_INVOICE.ROOT,
+      },
+      {
+        id: "general_sale",
+        label: "General Sale Invoice",
+        icon: FileCheck,
+        route: ROUTES_PATHS.DASHBOARD.SALE_INVOICE.GENERAL,
       },
       {
         id: "combined_sale",

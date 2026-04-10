@@ -8,13 +8,10 @@ const CombinedQuotationForm = () => {
 
     return (
         <CombinedDocumentForm
+            variant="quotation"
             title="Quotation Details"
             submitLabel="Create Quotation"
             searchCustomerByName={searchCustomerByName}
-            extraFields={[
-                { type: 'date', name: 'valid_until', label: 'Valid Until', placeholder: 'Expiry date' },
-
-            ]}
             onSubmit={async (data) => {
                 await addCombinedQuotation({
                     customerId: data.customerId,
@@ -24,7 +21,7 @@ const CombinedQuotationForm = () => {
                     gst: Number(data.gst),
                     notes: data.notes,
                     is_tax_inclusive: data.is_tax_inclusive || false,
-                    items: data.items.map(i => ({ ...i, description: i.description || "" })),
+                    items: data.items.map(i => ({ ...i, description: i.description || "", gst: i.gst ?? 0 })),
                 })
             }}
         />

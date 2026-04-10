@@ -30,6 +30,7 @@ export interface RoutesPathProps {
       ROOT: string;
       ITEM: string;
       COMBINED: string;
+      GENERAL: string;
     };
   };
 }
@@ -68,6 +69,7 @@ export const ROUTES_PATHS: RoutesPathProps = {
       ROOT: "/dashboard/sale-invoice",
       ITEM: "/dashboard/sale-invoice/item",
       COMBINED: "/dashboard/sale-invoice/combined",
+      GENERAL: "/dashboard/sale-invoice/general",
     },
   },
 };

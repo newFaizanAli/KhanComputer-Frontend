@@ -11,6 +11,8 @@ import type {
   SaleInvoice,
   Quotation,
   QuotationItem,
+  GeneralSaleInvoice,
+  GeneralSaleInvoiceData,
 } from "./base";
 import type { LetterHead } from "./letterhead";
 import type {
@@ -34,4 +36,6 @@ export type {
   DocumentItem,
   LetterHead,
   CombinedDocumentFormValues,
+  GeneralSaleInvoice,
+  GeneralSaleInvoiceData,
 };

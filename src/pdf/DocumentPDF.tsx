@@ -49,7 +49,6 @@ const paymentStatusColor = (status: string | null | undefined): string => {
 // ── Main component ───────────────────────────────────────────────────────────
 const DocumentPDF: React.FC<{ data: NormalizedDocumentData }> = ({ data }) => {
 
-    // ── Pull every field individually — no spread/cast, fully typed ───────────
     const docType = data.docType ?? "QUOTATION";
     const meta = data.meta ?? { code: "—", date: "", thirdField: { label: "—", value: "—" } };
     const customer = data.customer ?? null;
@@ -58,17 +57,18 @@ const DocumentPDF: React.FC<{ data: NormalizedDocumentData }> = ({ data }) => {
     const discount = Number(data.discount ?? 0);
     const gst = Number(data.gst ?? 0);
     const notes = data.notes ?? "";
-    // Explicit boolean: only `true` counts as tax-inclusive
     const isTaxInclusive = data.is_tax_inclusive === true;
-    // Invoice-only fields — all declared in NormalizedDocumentData
     const payment_method = data.payment_method ?? null;
     const payment_reference = data.payment_reference ?? null;
     const payment_status = data.payment_status ?? null;
     const quotation_code = data.quotation_code ?? null;
 
     const isInvoice = docType === "INVOICE";
-    // showTax drives ALL conditional rendering: columns, totals rows, info lines
-    const showTax = !isTaxInclusive;
+    const isGeneralInvoice = docType === "GENERAL_INVOICE";
+    const isQuotation = docType === "QUOTATION";
+
+    // showTax: false for general invoice (never has tax) and tax-inclusive invoices
+    const showTax = !isGeneralInvoice && !isTaxInclusive;
 
     // ── Totals ────────────────────────────────────────────────────────────────
     const totals = items.reduce((acc, item) => {
@@ -79,7 +79,7 @@ const DocumentPDF: React.FC<{ data: NormalizedDocumentData }> = ({ data }) => {
         const gstPercent = Number(item?.gst || 0);
         const discAmount = (base * discPercent) / 100;
         const afterDisc = base - discAmount;
-        const gstAmount = (afterDisc * gstPercent) / 100;
+        const gstAmount = showTax ? (afterDisc * gstPercent) / 100 : 0;
         acc.subtotal += base;
         acc.itemDiscount += discAmount;
         acc.itemGST += gstAmount;
@@ -87,27 +87,29 @@ const DocumentPDF: React.FC<{ data: NormalizedDocumentData }> = ({ data }) => {
     }, { subtotal: 0, itemDiscount: 0, itemGST: 0 });
 
     const headerDiscount = Number(discount || 0);
-    const headerGST = Number(gst || 0);
+    const headerGST = showTax ? Number(gst || 0) : 0;
     const afterHeaderDiscount = totals.subtotal - totals.itemDiscount - headerDiscount;
     const headerGSTAmount = (afterHeaderDiscount * headerGST) / 100;
 
-    // When tax-inclusive: discounts apply but NO gst is added
     const grandTotal = showTax
         ? afterHeaderDiscount + totals.itemGST + headerGSTAmount
         : afterHeaderDiscount;
 
-    const storeNotes = isInvoice ? store?.sale_invoice_notes : store?.quotation_notes;
+    const storeNotes = isInvoice
+        ? store?.sale_invoice_notes
+        : isQuotation
+            ? store?.quotation_notes
+            : null;    // general invoice has no dedicated store notes field
     const allNotes = [notes, store?.notes].filter(Boolean).join("\n\n");
     const contactLine = [store?.address, store?.phone, store?.email]
         .filter(Boolean).join("   |   ") || "—";
 
-    // ── Info lines — spread syntax so no conditional null in the middle ────────
+    // ── Info lines ────────────────────────────────────────────────────────────
     const billLines = [
         bold(customer?.name),
         line("", customer?.address),
         line("Phone: ", customer?.phone),
         line("Email: ", customer?.email),
-        // Tax fields: only pushed when showTax is true
         ...(showTax ? [
             line("GST No: ", customer?.gst),
             line("NTN: ", customer?.ntn),
@@ -126,8 +128,9 @@ const DocumentPDF: React.FC<{ data: NormalizedDocumentData }> = ({ data }) => {
     ];
 
     // ── Meta strip ────────────────────────────────────────────────────────────
+    const docLabel = isGeneralInvoice ? "SALE NO." : isInvoice ? "INVOICE NO." : "QUOTATION NO.";
     const metaItems = [
-        { label: isInvoice ? "INVOICE NO." : "QUOTATION NO.", value: safe(meta?.code) },
+        { label: docLabel, value: safe(meta?.code) || "—" },
         { label: "ISSUE DATE", value: fmtDate(meta?.date) },
         { label: safe(meta?.thirdField?.label), value: safe(meta?.thirdField?.value) },
         ...(isInvoice && quotation_code
@@ -135,7 +138,7 @@ const DocumentPDF: React.FC<{ data: NormalizedDocumentData }> = ({ data }) => {
             : []),
     ];
 
-    // ── Table columns ─────────────────────────────────────────────────────────
+    // ── Table columns — no GST column for general invoice ────────────────────
     const columns = showTax ? ITEM_COLS : ITEM_COLS_NO_TAX;
 
     const itemCellValues = (item: typeof items[number], idx: number): string[] => {
@@ -153,6 +156,7 @@ const DocumentPDF: React.FC<{ data: NormalizedDocumentData }> = ({ data }) => {
                 `PKR ${fmt(item?.total)}`,
             ];
         }
+        // No tax columns for general invoice or tax-inclusive
         return [
             String(idx + 1),
             desc + note,
@@ -164,7 +168,7 @@ const DocumentPDF: React.FC<{ data: NormalizedDocumentData }> = ({ data }) => {
         ];
     };
 
-    // ── Totals rows ───────────────────────────────────────────────────────────
+    // ── Totals rows — no GST rows for general invoice ─────────────────────────
     const totalRows = [
         { label: "Subtotal", val: `PKR ${fmt(totals.subtotal)}` },
         { label: "Item Discount", val: `- PKR ${fmt(totals.itemDiscount)} (${items.length ? "varies per item" : "0%"})` },
@@ -173,8 +177,16 @@ const DocumentPDF: React.FC<{ data: NormalizedDocumentData }> = ({ data }) => {
         ...(showTax ? [{ label: "Header GST", val: `+ PKR ${fmt(headerGSTAmount)} (${fmt(gst)}%)` }] : []),
     ];
 
-    // ── Payment block: only shown for invoices that have at least one field ───
-    const hasPaymentInfo = isInvoice && (!!payment_method || !!payment_reference || !!payment_status);
+    // ── Payment block ─────────────────────────────────────────────────────────
+    // Show for regular invoice AND general invoice (both can have payment info)
+    const hasPaymentInfo = (isInvoice || isGeneralInvoice) &&
+        (!!payment_method || !!payment_reference || !!payment_status);
+
+    // ── Badge colours ─────────────────────────────────────────────────────────
+    // General invoice uses the same accent color as regular invoice
+    const badgeColor = isQuotation ? C.brand : C.invoiceAccent;
+    const badgeLabel = isQuotation ? "QUOTATION" : "INVOICE";
+    const badgeSubLabel = isGeneralInvoice ? "GENERAL SALE" : isInvoice ? "SALES INVOICE" : "PRICE QUOTATION";
 
     return (
         <Document>
@@ -190,13 +202,10 @@ const DocumentPDF: React.FC<{ data: NormalizedDocumentData }> = ({ data }) => {
                         <Text style={pdf_style.contactLine}>{contactLine}</Text>
                     </View>
 
-                    <View style={[pdf_style.badge, { backgroundColor: isInvoice ? C.invoiceAccent : C.brand }]}>
-                        <Text style={pdf_style.badgeText}>
-                            {isInvoice ? "INVOICE" : "QUOTATION"}
-                        </Text>
-                        <Text style={pdf_style.badgeSubText}>
-                            {isInvoice ? "SALES INVOICE" : "PRICE QUOTATION"}
-                        </Text>
+                    <View style={[pdf_style.badge, { backgroundColor: badgeColor }]}>
+                        <Text style={pdf_style.badgeText}>{badgeLabel}</Text>
+                        <Text style={pdf_style.badgeSubText}>{badgeSubLabel}</Text>
+                        {/* TAX INCLUSIVE label only shown for regular tax-inclusive invoices */}
                         {isInvoice && isTaxInclusive && (
                             <Text style={[pdf_style.badgeSubText, {
                                 marginTop: 4,
@@ -231,10 +240,10 @@ const DocumentPDF: React.FC<{ data: NormalizedDocumentData }> = ({ data }) => {
                 {/* ── BILL TO / FROM ───────────────────────────────────────── */}
                 <View style={pdf_style.infoRow}>
                     <InfoBox title="BILL TO" lines={billLines} />
-                    <InfoBox title="FROM" lines={fromLines} />
+                    {!isGeneralInvoice && <InfoBox title="FROM" lines={fromLines} />}
                 </View>
 
-                {/* ── PAYMENT DETAILS (invoice only) ──────────────────────── */}
+                {/* ── PAYMENT DETAILS ──────────────────────────────────────── */}
                 {hasPaymentInfo && (
                     <View style={pdf_style.paymentRow}>
                         {!!payment_method && (
@@ -245,7 +254,7 @@ const DocumentPDF: React.FC<{ data: NormalizedDocumentData }> = ({ data }) => {
                                 </Text>
                             </View>
                         )}
-                        {payment_reference && (
+                        {!!payment_reference && (
                             <View style={[
                                 pdf_style.paymentItem,
                                 payment_method ? pdf_style.paymentItemBordered : {},
@@ -254,7 +263,8 @@ const DocumentPDF: React.FC<{ data: NormalizedDocumentData }> = ({ data }) => {
                                 <Text style={pdf_style.paymentValue}>{safe(payment_reference)}</Text>
                             </View>
                         )}
-                        {payment_status && (
+                        {/* payment_status only shown for regular invoices */}
+                        {isInvoice && !!payment_status && (
                             <View style={[
                                 pdf_style.paymentItem,
                                 (payment_method || payment_reference) ? pdf_style.paymentItemBordered : {},
@@ -286,7 +296,7 @@ const DocumentPDF: React.FC<{ data: NormalizedDocumentData }> = ({ data }) => {
                         ))}
                     </View>
 
-                    {!items || items.length === 0 ? (
+                    {items.length === 0 ? (
                         <View style={[pdf_style.tableRow, { backgroundColor: C.brandX, justifyContent: "center" }]}>
                             <Text style={{ fontSize: 8, color: C.muted }}>No items found.</Text>
                         </View>
@@ -333,7 +343,9 @@ const DocumentPDF: React.FC<{ data: NormalizedDocumentData }> = ({ data }) => {
                 {/* ── NOTES ───────────────────────────────────────────────── */}
                 {storeNotes ? (
                     <View style={pdf_style.notesWrap}>
-                        <Text style={pdf_style.notesTitle}>{isInvoice ? "INVOICE NOTES" : "QUOTATION NOTES"}</Text>
+                        <Text style={pdf_style.notesTitle}>
+                            {isGeneralInvoice ? "SALE NOTES" : isInvoice ? "INVOICE NOTES" : "QUOTATION NOTES"}
+                        </Text>
                         <Text style={pdf_style.notesBody}>{storeNotes}</Text>
                     </View>
                 ) : null}
@@ -348,13 +360,16 @@ const DocumentPDF: React.FC<{ data: NormalizedDocumentData }> = ({ data }) => {
                 {/* ── FOOTER ──────────────────────────────────────────────── */}
                 <View style={pdf_style.footer} fixed>
                     <Text style={pdf_style.footerLeft}>
-                        {isInvoice
-                            ? `Invoice Ref: ${safe(meta?.thirdField?.value)}. All prices in PKR${isTaxInclusive ? " — tax inclusive." : " inclusive of applicable taxes."}`
-                            : `Quotation valid until ${fmtDate(meta?.thirdField?.value)}. Prices subject to change. E&OE.`
+                        {isGeneralInvoice
+                            ? `Ref: ${safe(meta?.thirdField?.value)}. All prices in PKR — no tax applied.`
+                            : isInvoice
+                                ? `Invoice Ref: ${safe(meta?.thirdField?.value)}. All prices in PKR${isTaxInclusive ? " — tax inclusive." : " inclusive of applicable taxes."}`
+                                : `Quotation valid until ${fmtDate(meta?.thirdField?.value)}. Prices subject to change. E&OE.`
                         }
                     </Text>
                     <Text style={pdf_style.footerRight}>
-                        {safe(store?.name) === "—" ? "" : safe(store?.name)}   •   {safe(meta?.code)}
+                        {safe(store?.name) === "—" ? "" : safe(store?.name)}
+                        {meta?.code ? `   •   ${safe(meta.code)}` : ""}
                     </Text>
                 </View>
 

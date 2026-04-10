@@ -4,7 +4,7 @@ import { MainLayout, ProtectedLayout } from "../layout"
 import {
     SignInPage, DashboardPage, AnalyticsPage, UserPage, NotFound, CustomerPage, StorePage,
     QuotationPage, QuotationItemPage, CombinedQuotationPage, LetterHeadPage, LetterHeadListPage,
-    SaleInvoicePage, SaleInvoiceItemPage, CombinedSaleInvoicePage, ProfilePage
+    GeneralSaleInvoice, SaleInvoicePage, SaleInvoiceItemPage, CombinedSaleInvoicePage, ProfilePage,
 } from "../pages";
 import RoleGuard from "../components/shared/RoleGuard";
 
@@ -42,7 +42,8 @@ const appRoutes: {
                 { path: ROUTES_PATHS.DASHBOARD.QUOTATION.COMBINED, element: <CombinedQuotationPage /> },
                 { path: ROUTES_PATHS.DASHBOARD.SALE_INVOICE.ROOT, element: <SaleInvoicePage /> },
                 { path: ROUTES_PATHS.DASHBOARD.SALE_INVOICE.ITEM, element: <SaleInvoiceItemPage /> },
-                { path: ROUTES_PATHS.DASHBOARD.SALE_INVOICE.COMBINED, element: <CombinedSaleInvoicePage /> }
+                { path: ROUTES_PATHS.DASHBOARD.SALE_INVOICE.COMBINED, element: <CombinedSaleInvoicePage /> },
+                { path: ROUTES_PATHS.DASHBOARD.SALE_INVOICE.GENERAL, element: <GeneralSaleInvoice /> },
             ],
         },
         { path: '*', element: <NotFound /> },
